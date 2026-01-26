@@ -19,9 +19,9 @@ const tasksCollection = collection(db, 'tasks')
 export const addTask = async (
   title: string,
   description: string,
-  amount: number,
-  category: string,
-  spentAt: string,
+  amount?: number,
+  category?: string,
+  spentAt?: string,
   isComplete: boolean = false
 ) => {
   const user = auth.currentUser
@@ -30,9 +30,9 @@ export const addTask = async (
   await addDoc(tasksCollection, {
     title,
     description,
-    amount,
-    category,
-    spentAt,
+    amount: typeof amount === 'number' ? amount : 0,
+    category: category || 'Uncategorized',
+    spentAt: spentAt || new Date().toISOString(),
     isComplete,
     userId: user.uid,
     createdAt: new Date().toISOString()
@@ -97,9 +97,9 @@ export const updateTask = async (
   id: string,
   title: string,
   description: string,
-  amount: number,
-  category: string,
-  spentAt: string,
+  amount?: number,
+  category?: string,
+  spentAt?: string,
   isComplete?: boolean
 ) => {
   const user = auth.currentUser
@@ -113,14 +113,17 @@ export const updateTask = async (
   const data = snap.data()
   if (data.userId !== user.uid) throw new Error('Unauthorized')
 
-  await updateDoc(ref, {
+  const updates: Record<string, any> = {
     title,
     description,
-    amount,
-    category,
-    spentAt,
     isComplete: isComplete ?? data.isComplete
-  })
+  }
+
+  if (typeof amount === 'number') updates.amount = amount
+  if (typeof category === 'string' && category.trim()) updates.category = category
+  if (typeof spentAt === 'string' && spentAt.trim()) updates.spentAt = spentAt
+
+  await updateDoc(ref, updates)
 }
 
 export const deleteTask = async (id: string) => {

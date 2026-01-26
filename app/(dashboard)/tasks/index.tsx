@@ -153,7 +153,7 @@ const Tasks = () => {
                 <TouchableOpacity
                   onPress={(e) => {
                     e.stopPropagation()
-                    handleComplete(task.id, task.isComplete)
+                    handleComplete(task.id, task.isComplete ?? false)
                   }}
                   className={`p-2 rounded-full ${
                     task.isComplete ? "bg-green-100" : "bg-gray-100"

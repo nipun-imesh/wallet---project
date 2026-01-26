@@ -1,15 +1,15 @@
-import { View, Text } from "react-native"
-import React from "react"
-import { Slot } from "expo-router"
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
-import { LoaderProvider } from "@/context/LoaderContext"
-import { AuthProvider } from "@/context/AuthContext"
+import { AuthProvider } from "@/context/AuthContext";
+import { LoaderProvider } from "@/context/LoaderContext";
+import { Slot } from "expo-router";
+import React from "react";
+import { View } from "react-native";
+import {
+  useSafeAreaInsets
+} from "react-native-safe-area-context";
 
 // App.tsx ->
 const RootLayout = () => {
-  const insets = useSafeAreaInsets()
-
-  console.log(insets)
+  const insets = useSafeAreaInsets();
 
   return (
     // <SafeAreaView className="flex-1">
@@ -21,7 +21,7 @@ const RootLayout = () => {
       </AuthProvider>
     </LoaderProvider>
     // </SafeAreaView>
-  )
-}
+  );
+};
 
-export default RootLayout
+export default RootLayout;

@@ -13,9 +13,10 @@ import React, { useState } from "react"
 import { useRouter } from "expo-router"
 import { useLoader } from "@/hooks/useLoader"
 import { login, loginWithGoogleIdToken } from "@/services/authService"
-import { MaterialIcons } from "@expo/vector-icons"
+import { Ionicons, MaterialIcons } from "@expo/vector-icons"
 import * as WebBrowser from "expo-web-browser"
 import * as Google from "expo-auth-session/providers/google"
+import { makeRedirectUri } from "expo-auth-session"
 import Constants from "expo-constants"
 
 WebBrowser.maybeCompleteAuthSession()
@@ -46,19 +47,30 @@ const Login = () => {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
 
-  const googleWebClientId =
-    (Constants.expoConfig?.extra as any)?.googleWebClientId || ""
-  const googleAndroidClientId =
-    (Constants.expoConfig?.extra as any)?.googleAndroidClientId || ""
-  const googleIosClientId =
-    (Constants.expoConfig?.extra as any)?.googleIosClientId || ""
+  const extra: any =
+    (Constants.expoConfig?.extra as any) ||
+    (Constants as any)?.expoGoConfig?.extra ||
+    (Constants as any)?.manifest?.extra ||
+    (Constants as any)?.manifest2?.extra ||
+    {}
 
-  const [googleRequest, googleResponse, googlePromptAsync] =
+  const googleWebClientId = String(extra.googleWebClientId || "").trim()
+  const googleAndroidClientId = String(extra.googleAndroidClientId || "").trim()
+  const googleIosClientId = String(extra.googleIosClientId || "").trim()
+  const expoClientId = googleWebClientId
+
+  const redirectUri = makeRedirectUri({ scheme: "wallet", useProxy: true } as any)
+
+  const [googleRequest, _googleResponse, googlePromptAsync] =
     Google.useAuthRequest({
+      expoClientId,
       webClientId: googleWebClientId,
       androidClientId: googleAndroidClientId,
-      iosClientId: googleIosClientId
-    })
+      iosClientId: googleIosClientId,
+      redirectUri,
+      responseType: "id_token",
+      scopes: ["openid", "profile", "email"]
+    } as any)
 
   const { showLoader, hideLoader, isLoading } = useLoader()
 
@@ -101,7 +113,7 @@ const Login = () => {
 
     showLoader()
     try {
-      const result = await googlePromptAsync({ useProxy: true })
+      const result = await googlePromptAsync({ useProxy: true } as any)
       if (result.type !== "success") return
 
       // Expo returns tokens in different shapes depending on platform/flow.
@@ -223,7 +235,7 @@ const Login = () => {
             onPress={handleGoogleLogin}
           >
             <View className="flex-row items-center justify-center">
-              <MaterialIcons name="google" size={22} color="#111827" />
+              <Ionicons name="logo-google" size={20} color="#111827" />
               <Text className="text-gray-900 text-lg font-semibold ml-2">
                 Continue with Google
               </Text>
