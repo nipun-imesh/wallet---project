@@ -1,84 +1,46 @@
-import { View, Text, TouchableOpacity, Alert, ScrollView } from "react-native"
-import React, { useCallback, useState } from "react"
-import { MaterialIcons } from "@expo/vector-icons"
-import { useFocusEffect, useRouter } from "expo-router"
-import { useLoader } from "@/hooks/useLoader"
+import { useAuth } from "@/hooks/useAuth";
+import { useLoader } from "@/hooks/useLoader";
 import {
+  completeTask,
+  deleteTask,
   getAllTask,
   getAllTaskByStatus,
-  completeTask,
-  deleteTask
-} from "@/services/taskService"
-import { Task } from "@/types/task"
+} from "@/services/taskService";
+import type { Task } from "@/types/task";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useMemo, useState } from "react";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-type Tab = "All" | "Completed" | "Pending"
+type TabKey = "All" | "Completed" | "Pending";
 
 const Tasks = () => {
-  const router = useRouter()
-  const { showLoader, hideLoader } = useLoader()
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [activeTab, setActiveTab] = useState<Tab>("All")
+  const router = useRouter();
+  const { showLoader, hideLoader, isLoading } = useLoader();
+  const { user } = useAuth();
+  const tabBarHeight = useBottomTabBarHeight();
+  const insets = useSafeAreaInsets();
 
-  const fetchTasks = async (tab: Tab = "All") => {
-    showLoader()
-    try {
-      let data: Task[] = []
-      if (tab === "All") data = await getAllTask()
-      else data = await getAllTaskByStatus(tab === "Completed")
-      setTasks(data)
-    } catch {
-      Alert.alert("Error", "Error fetching tasks")
-    } finally {
-      hideLoader()
-    }
-  }
+  const displayName =
+    user?.displayName ||
+    (user?.email ? user.email.split("@")[0] : "") ||
+    "User";
+  const photoUrl = user?.photoURL || "";
+  const initial = String(displayName).trim().charAt(0).toUpperCase() || "U";
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchTasks(activeTab)
-    }, [activeTab])
-  )
+  const [activeTab, setActiveTab] = useState<TabKey>("All");
+  const [tasks, setTasks] = useState<Task[]>([]);
 
-  const handleComplete = async (id: string, currentStatus: boolean) => {
-    showLoader()
-    try {
-      await completeTask(id, !currentStatus)
-      fetchTasks(activeTab)
-    } catch {
-      Alert.alert("Error", "Could not update task")
-    } finally {
-      hideLoader()
-    }
-  }
-
-  const handleDelete = async (id: string) => {
-    Alert.alert(
-      "Confirm Delete",
-      "Are you sure you want to delete this task?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            showLoader()
-            try {
-              await deleteTask(id)
-              fetchTasks(activeTab)
-            } catch {
-              Alert.alert("Error", "Could not delete task")
-            } finally {
-              hideLoader()
-            }
-          }
-        }
-      ]
-    )
-  }
-
-  const handleEdit = (id: string) => {
-    router.push({ pathname: "/tasks/form", params: { taskId: id } })
-  }
+  const tabs = useMemo(() => ["All", "Completed", "Pending"] as const, []);
 
   const formatDate = (dateStr: string | number | Date) =>
     new Date(dateStr).toLocaleDateString("en-US", {
@@ -86,33 +48,132 @@ const Tasks = () => {
       month: "short",
       day: "numeric",
       hour: "2-digit",
-      minute: "2-digit"
-    })
+      minute: "2-digit",
+    });
+
+  const fetchTasks = useCallback(async () => {
+    showLoader();
+    try {
+      const result =
+        activeTab === "All"
+          ? await getAllTask()
+          : await getAllTaskByStatus(activeTab === "Completed");
+
+      setTasks(result as Task[]);
+    } catch (e: any) {
+      Alert.alert("Error", e?.message || "Failed to load tasks");
+    } finally {
+      hideLoader();
+    }
+  }, [activeTab, hideLoader, showLoader]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchTasks();
+    }, [fetchTasks]),
+  );
+
+  const handleToggleComplete = useCallback(
+    async (task: Task) => {
+      if (isLoading) return;
+
+      showLoader();
+      try {
+        await completeTask(task.id, !(task.isComplete ?? false));
+        await fetchTasks();
+      } catch (e: any) {
+        Alert.alert("Error", e?.message || "Failed to update task");
+      } finally {
+        hideLoader();
+      }
+    },
+    [fetchTasks, hideLoader, isLoading, showLoader],
+  );
+
+  const handleDelete = useCallback(
+    (taskId: string) => {
+      Alert.alert("Delete task", "Are you sure you want to delete this task?", [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            if (isLoading) return;
+            showLoader();
+            try {
+              await deleteTask(taskId);
+              await fetchTasks();
+            } catch (e: any) {
+              Alert.alert("Error", e?.message || "Failed to delete task");
+            } finally {
+              hideLoader();
+            }
+          },
+        },
+      ]);
+    },
+    [fetchTasks, hideLoader, isLoading, showLoader],
+  );
+
+  const handleEdit = useCallback(
+    (taskId: string) => {
+      router.push({ pathname: "/tasks/form", params: { taskId } } as any);
+    },
+    [router],
+  );
+
+  const handleAdd = useCallback(() => {
+    router.push("/tasks/form");
+  }, [router]);
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <View className="flex-row justify-around py-3 bg-white border-b border-gray-200">
-        {(["All", "Completed", "Pending"] as Tab[]).map((tab) => (
-          <TouchableOpacity key={tab} onPress={() => setActiveTab(tab)}>
-            <Text
-              className={`text-lg font-semibold ${
-                activeTab === tab ? "text-blue-600" : "text-gray-500"
-              }`}
-            >
-              {tab}
+    <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
+      <View className="bg-white px-6 py-4 flex-row items-center justify-between border-b border-gray-200">
+        <View className="flex-row items-center">
+          {photoUrl ? (
+            <Image
+              source={{ uri: photoUrl }}
+              className="w-11 h-11 rounded-full bg-gray-200"
+            />
+          ) : (
+            <View className="w-11 h-11 rounded-full bg-gray-200 items-center justify-center">
+              <Text className="text-gray-700 font-bold">{initial}</Text>
+            </View>
+          )}
+
+          <View className="ml-3">
+            <Text className="text-xs text-gray-500">Welcome</Text>
+            <Text className="text-lg font-semibold text-gray-900">
+              {displayName}
             </Text>
-          </TouchableOpacity>
-        ))}
+          </View>
+        </View>
       </View>
 
-      <TouchableOpacity
-        className="bg-blue-600/80 rounded-full shadow-lg absolute bottom-0 right-0 m-6 p-2 z-50"
-        onPress={() => router.push("/tasks/form")}
-      >
-        <MaterialIcons name="add" size={40} color="#fff" />
-      </TouchableOpacity>
+      <View className="flex-row justify-around py-3 bg-white border-b border-gray-200">
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab;
+          return (
+            <TouchableOpacity key={tab} onPress={() => setActiveTab(tab)}>
+              <Text
+                className={`text-lg font-semibold ${
+                  isActive ? "text-blue-600" : "text-gray-500"
+                }`}
+              >
+                {tab}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
 
-      <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 24 }}>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          padding: 24,
+          paddingBottom: tabBarHeight + 24,
+        }}
+      >
         {tasks.length === 0 ? (
           <Text className="text-gray-600 text-center mt-10">
             No tasks found.
@@ -124,12 +185,7 @@ const Tasks = () => {
               className="bg-white p-4 rounded-2xl mb-4 border border-gray-300 shadow-md"
             >
               <TouchableOpacity
-                onPress={() =>
-                  router.push({
-                    pathname: "/tasks/[id]",
-                    params: { id: task.id }
-                  })
-                }
+                onPress={() => handleEdit(task.id)}
                 className="flex-row justify-between items-center mb-2"
               >
                 <View className="flex-1 mr-2">
@@ -137,8 +193,8 @@ const Tasks = () => {
                     {task.title}
                   </Text>
                   <Text className="text-gray-600 mb-2">
-                    {task.description.length > 30
-                      ? `${task.description.substring(0, 30)}...`
+                    {(task.description || "").length > 60
+                      ? `${(task.description || "").substring(0, 60)}...`
                       : task.description}
                   </Text>
                   <Text
@@ -151,10 +207,7 @@ const Tasks = () => {
                 </View>
 
                 <TouchableOpacity
-                  onPress={(e) => {
-                    e.stopPropagation()
-                    handleComplete(task.id, task.isComplete ?? false)
-                  }}
+                  onPress={() => handleToggleComplete(task)}
                   className={`p-2 rounded-full ${
                     task.isComplete ? "bg-green-100" : "bg-gray-100"
                   }`}
@@ -170,11 +223,13 @@ const Tasks = () => {
                   />
                 </TouchableOpacity>
               </TouchableOpacity>
+
               <View className="flex-row justify-between items-end">
                 <Text className="text-gray-500 text-sm mb-1">
                   Created: {task.createdAt ? formatDate(task.createdAt) : "-"}
                 </Text>
-                <View className="flex-row justify-end mt-2 space-x-3">
+
+                <View className="flex-row justify-end mt-2">
                   <TouchableOpacity
                     onPress={() => handleEdit(task.id)}
                     className="p-2 rounded-full bg-yellow-500"
@@ -193,8 +248,16 @@ const Tasks = () => {
           ))
         )}
       </ScrollView>
-    </View>
-  )
-}
 
-export default Tasks
+      <TouchableOpacity
+        className="bg-blue-600/80 rounded-full shadow-lg absolute right-0 m-6 p-2 z-50"
+        style={{ bottom: tabBarHeight + 12 }}
+        onPress={handleAdd}
+      >
+        <MaterialIcons name="add" size={40} color="#fff" />
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+export default Tasks;

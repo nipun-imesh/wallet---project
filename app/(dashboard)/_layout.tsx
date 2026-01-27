@@ -1,20 +1,20 @@
-import { View, Text } from "react-native"
-import React from "react"
-import { Tabs } from "expo-router"
-import { MaterialIcons, Ionicons } from "@expo/vector-icons"
+import { View, Text } from "react-native";
+import React from "react";
+import { Tabs } from "expo-router";
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 
 const tabs = [
   { name: "home", icon: "home", title: "Home" },
-  { name: "tasks", icon: "list", title: "Tasks" },
   { name: "news", icon: "article", title: "News" },
-  { name: "profile", icon: "person", title: "Profile" }
-] as const
+  { name: "profile", icon: "person", title: "Profile" },
+  { name: "tasks", icon: "list", title: "Tasks" }
+] as const;
 // DRY - Don't Repeat Yourself
 const DashboardLayout = () => {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false
+        headerShown: false,
       }}
       // tabBar={(props) => <></>}
     >
@@ -24,7 +24,7 @@ const DashboardLayout = () => {
           options={{
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name={tab.icon} color={color} size={size} />
-            )
+            ),
           }}
         />
       ))}
@@ -41,7 +41,7 @@ const DashboardLayout = () => {
       {/* <Tabs.Screen name="news" /> news.tsx */}
       {/* <Tabs.Screen name="profile" /> profile.tsx */}
     </Tabs>
-  )
-}
+  );
+};
 
-export default DashboardLayout
+export default DashboardLayout;
