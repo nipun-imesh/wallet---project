@@ -1,11 +1,11 @@
 import { useAuth } from "@/hooks/useAuth";
 import {
-  confirmBiometric,
-  ensureBiometricAvailable,
-  getBiometricPrompted,
-  markBiometricJustEnabled,
-  setBiometricEnabled,
-  setBiometricPrompted,
+    confirmBiometric,
+    ensureBiometricAvailable,
+    getBiometricPrompted,
+    markBiometricJustEnabled,
+    setBiometricEnabled,
+    setBiometricPrompted,
 } from "@/services/biometricService";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -152,7 +152,11 @@ const BiometricSetup = () => {
 
         <View className="flex-row items-center justify-between mt-6">
           <Text className="text-gray-900 font-medium">Use fingerprint</Text>
-          <Switch value={enabled} onValueChange={handleToggle} disabled={busy} />
+          <Switch
+            value={enabled}
+            onValueChange={handleToggle}
+            disabled={busy}
+          />
         </View>
 
         <Pressable

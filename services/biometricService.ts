@@ -43,7 +43,9 @@ export async function markBiometricJustEnabled(uid: string): Promise<void> {
   await AsyncStorage.setItem(justEnabledKeyForUser(uid), "true");
 }
 
-export async function consumeBiometricJustEnabled(uid: string): Promise<boolean> {
+export async function consumeBiometricJustEnabled(
+  uid: string,
+): Promise<boolean> {
   if (!uid) return false;
   const value = await AsyncStorage.getItem(justEnabledKeyForUser(uid));
   if (value === "true") {

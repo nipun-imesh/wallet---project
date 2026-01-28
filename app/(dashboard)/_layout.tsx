@@ -8,8 +8,8 @@ import {
 } from "@/services/biometricService";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { AppState, Pressable, Text, View } from "react-native";
 
 const tabs = [
   { name: "home", icon: "home", title: "Home" },
@@ -25,6 +25,9 @@ const DashboardLayout = () => {
   const [checking, setChecking] = useState(true);
   const [unlocked, setUnlocked] = useState(false);
   const [needsBiometric, setNeedsBiometric] = useState(false);
+
+  const lastAppState = useRef(AppState.currentState);
+  const promptInFlight = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -80,6 +83,50 @@ const DashboardLayout = () => {
 
     return () => {
       cancelled = true;
+    };
+  }, [user?.uid]);
+
+  useEffect(() => {
+    // When app comes back from background/inactive -> active, re-prompt if biometrics enabled.
+    const sub = AppState.addEventListener("change", async (nextState) => {
+      const prev = lastAppState.current;
+      lastAppState.current = nextState;
+
+      if (!user?.uid) return;
+      if (nextState !== "active") return;
+      if (prev === "active") return;
+      if (promptInFlight.current) return;
+
+      try {
+        const enabled = await getBiometricEnabled(user.uid);
+        setNeedsBiometric(enabled);
+        if (!enabled) return;
+
+        // If the user just enabled biometrics in setup, don't instantly re-prompt.
+        const justEnabled = await consumeBiometricJustEnabled(user.uid);
+        if (justEnabled) {
+          setUnlocked(true);
+          return;
+        }
+
+        const available = await ensureBiometricAvailable();
+        if (!available.ok) {
+          setUnlocked(true);
+          return;
+        }
+
+        // Lock again and request fingerprint on resume.
+        setUnlocked(false);
+        promptInFlight.current = true;
+        const ok = await confirmBiometric("Unlock Wallet");
+        setUnlocked(ok);
+      } finally {
+        promptInFlight.current = false;
+      }
+    });
+
+    return () => {
+      sub.remove();
     };
   }, [user?.uid]);
 

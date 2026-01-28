@@ -21,8 +21,7 @@ WebBrowser.maybeCompleteAuthSession();
 
 const GOOGLE_WEB_CLIENT_ID =
   "1085078686882-5fh5pu25mr6ddgojlvm357n3bkooimvp.apps.googleusercontent.com";
-  //  1085078686882-5fh5pu25mr6ddgojlvm357n3bkooimvp.apps.googleusercontent.com
-
+//  1085078686882-5fh5pu25mr6ddgojlvm357n3bkooimvp.apps.googleusercontent.com
 
 const PROXY_REDIRECT_URI = "https://auth.expo.io/@nipunimesh/wallet";
 
