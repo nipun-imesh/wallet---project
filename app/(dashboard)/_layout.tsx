@@ -1,21 +1,21 @@
-import { View, Text, Pressable } from "react-native";
-import React, { useEffect, useState } from "react";
-import { Tabs } from "expo-router";
-import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/hooks/useAuth";
+import { logoutUser } from "@/services/authService";
 import {
   confirmBiometric,
+  consumeBiometricJustEnabled,
   ensureBiometricAvailable,
   getBiometricEnabled,
 } from "@/services/biometricService";
-import { useRouter } from "expo-router";
-import { logoutUser } from "@/services/authService";
+import { MaterialIcons } from "@expo/vector-icons";
+import { Tabs, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 
 const tabs = [
   { name: "home", icon: "home", title: "Home" },
   { name: "news", icon: "article", title: "News" },
   { name: "profile", icon: "person", title: "Profile" },
-  { name: "tasks", icon: "list", title: "Tasks" }
+  { name: "tasks", icon: "list", title: "Tasks" },
 ] as const;
 // DRY - Don't Repeat Yourself
 const DashboardLayout = () => {
@@ -45,6 +45,14 @@ const DashboardLayout = () => {
         setNeedsBiometric(enabled);
 
         if (!enabled) {
+          setUnlocked(true);
+          setChecking(false);
+          return;
+        }
+
+        // If the user just enabled biometrics in the setup screen, skip an immediate re-prompt.
+        const justEnabled = await consumeBiometricJustEnabled(user.uid);
+        if (justEnabled) {
           setUnlocked(true);
           setChecking(false);
           return;

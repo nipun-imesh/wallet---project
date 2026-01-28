@@ -1,8 +1,9 @@
-import * as LocalAuthentication from "expo-local-authentication";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as LocalAuthentication from "expo-local-authentication";
 
 const keyForUser = (uid: string) => `biometricEnabled:${uid}`;
 const promptedKeyForUser = (uid: string) => `biometricPrompted:${uid}`;
+const justEnabledKeyForUser = (uid: string) => `biometricJustEnabled:${uid}`;
 
 export async function getBiometricEnabled(uid: string): Promise<boolean> {
   if (!uid) return false;
@@ -29,7 +30,27 @@ export async function setBiometricPrompted(
   prompted: boolean,
 ): Promise<void> {
   if (!uid) return;
-  await AsyncStorage.setItem(promptedKeyForUser(uid), prompted ? "true" : "false");
+  await AsyncStorage.setItem(
+    promptedKeyForUser(uid),
+    prompted ? "true" : "false",
+  );
+}
+
+// Used to prevent an immediate second prompt: when user enables biometrics during setup,
+// the dashboard lock screen would otherwise prompt again right away.
+export async function markBiometricJustEnabled(uid: string): Promise<void> {
+  if (!uid) return;
+  await AsyncStorage.setItem(justEnabledKeyForUser(uid), "true");
+}
+
+export async function consumeBiometricJustEnabled(uid: string): Promise<boolean> {
+  if (!uid) return false;
+  const value = await AsyncStorage.getItem(justEnabledKeyForUser(uid));
+  if (value === "true") {
+    await AsyncStorage.removeItem(justEnabledKeyForUser(uid));
+    return true;
+  }
+  return false;
 }
 
 export async function ensureBiometricAvailable(): Promise<{
@@ -37,7 +58,8 @@ export async function ensureBiometricAvailable(): Promise<{
   reason?: string;
 }> {
   const hasHardware = await LocalAuthentication.hasHardwareAsync();
-  if (!hasHardware) return { ok: false, reason: "This device has no biometrics." };
+  if (!hasHardware)
+    return { ok: false, reason: "This device has no biometrics." };
 
   const enrolled = await LocalAuthentication.isEnrolledAsync();
   if (!enrolled)

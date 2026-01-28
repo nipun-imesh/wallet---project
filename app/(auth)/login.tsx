@@ -100,7 +100,7 @@ const Login = () => {
     showLoader();
     try {
       await login(cleanEmail, password);
-      router.replace("/home");
+      router.replace("/biometric-setup");
     } catch (e: any) {
       Alert.alert("Login failed", authErrorMessage(e));
     } finally {
@@ -135,7 +135,7 @@ const Login = () => {
       }
 
       await loginWithGoogleIdToken(idToken);
-      router.replace("/home");
+      router.replace("/biometric-setup");
     } catch (e: any) {
       Alert.alert("Google Login failed", e?.message || "Please try again");
     } finally {

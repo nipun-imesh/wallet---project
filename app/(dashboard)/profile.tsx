@@ -1,6 +1,12 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useLoader } from "@/hooks/useLoader";
 import {
+  confirmBiometric,
+  ensureBiometricAvailable,
+  getBiometricEnabled,
+  setBiometricEnabled,
+} from "@/services/biometricService";
+import {
   addFinanceCard,
   addFinanceTransaction,
   getFinanceSummary,
@@ -23,12 +29,6 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  confirmBiometric,
-  ensureBiometricAvailable,
-  getBiometricEnabled,
-  setBiometricEnabled,
-} from "@/services/biometricService";
 
 const Profile = () => {
   const insets = useSafeAreaInsets();
@@ -47,8 +47,7 @@ const Profile = () => {
   const [txAmount, setTxAmount] = useState("");
   const [txNote, setTxNote] = useState("");
 
-  const [biometricEnabled, setBiometricEnabledState] =
-    useState<boolean>(false);
+  const [biometricEnabled, setBiometricEnabledState] = useState<boolean>(false);
 
   const displayName =
     user?.displayName ||
