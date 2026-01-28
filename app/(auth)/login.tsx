@@ -62,8 +62,8 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const clientId = GOOGLE_WEB_CLIENT_ID;
-  const iosClientId = "";
-  const androidClientId = "";
+  // const iosClientId = "";
+  // const androidClientId = "";
 
   // Force Expo proxy redirect in dev (Expo Go)
   const redirectUri = PROXY_REDIRECT_URI;
@@ -72,10 +72,10 @@ const Login = () => {
   console.log("Google redirectUri:", redirectUri);
 
   const [googleRequest, _googleResponse, googlePromptAsync] =
-    Google.useIdTokenAuthRequest({
+    Google.useAuthRequest({
       clientId,
-      iosClientId: iosClientId || clientId,
-      androidClientId: androidClientId || clientId,
+      // iosClientId: iosClientId || clientId,
+      // androidClientId: androidClientId || clientId,
       redirectUri,
     } as any);
 
