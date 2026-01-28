@@ -19,7 +19,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.nipunimesh.wallet"
     },
     "web": {
       "output": "static",
@@ -44,10 +45,6 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
-    "extra": {
-      "googleWebClientId": "1085078686882-5fh5pu25mr6ddgojlvm357n3bkooimvp.apps.googleusercontent.com",
-      "googleAndroidClientId": "",
-      "googleIosClientId": ""
-    }
+    "extra": {}
   }
 }
