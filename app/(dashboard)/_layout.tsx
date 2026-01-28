@@ -1,7 +1,15 @@
-import { View, Text } from "react-native";
-import React from "react";
+import { View, Text, Pressable } from "react-native";
+import React, { useEffect, useState } from "react";
 import { Tabs } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  confirmBiometric,
+  ensureBiometricAvailable,
+  getBiometricEnabled,
+} from "@/services/biometricService";
+import { useRouter } from "expo-router";
+import { logoutUser } from "@/services/authService";
 
 const tabs = [
   { name: "home", icon: "home", title: "Home" },
@@ -11,6 +19,97 @@ const tabs = [
 ] as const;
 // DRY - Don't Repeat Yourself
 const DashboardLayout = () => {
+  const { user } = useAuth();
+  const router = useRouter();
+
+  const [checking, setChecking] = useState(true);
+  const [unlocked, setUnlocked] = useState(false);
+  const [needsBiometric, setNeedsBiometric] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      if (!user?.uid) {
+        if (!cancelled) {
+          setNeedsBiometric(false);
+          setUnlocked(true);
+          setChecking(false);
+        }
+        return;
+      }
+
+      try {
+        const enabled = await getBiometricEnabled(user.uid);
+        if (cancelled) return;
+        setNeedsBiometric(enabled);
+
+        if (!enabled) {
+          setUnlocked(true);
+          setChecking(false);
+          return;
+        }
+
+        const available = await ensureBiometricAvailable();
+        if (!available.ok) {
+          setUnlocked(true);
+          setChecking(false);
+          return;
+        }
+
+        const ok = await confirmBiometric("Unlock Wallet");
+        if (!cancelled) {
+          setUnlocked(ok);
+          setChecking(false);
+        }
+      } catch {
+        if (!cancelled) {
+          setUnlocked(true);
+          setChecking(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.uid]);
+
+  if (checking) {
+    return <View className="flex-1 bg-white" />;
+  }
+
+  if (needsBiometric && !unlocked) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center px-8">
+        <Text className="text-lg font-semibold text-gray-900">
+          Fingerprint required
+        </Text>
+        <Text className="text-gray-500 text-center mt-2">
+          Please confirm your fingerprint to continue.
+        </Text>
+        <Pressable
+          className="mt-6 bg-gray-900 rounded-2xl px-6 py-3"
+          onPress={async () => {
+            const ok = await confirmBiometric("Unlock Wallet");
+            if (ok) setUnlocked(true);
+          }}
+        >
+          <Text className="text-white font-semibold">Try again</Text>
+        </Pressable>
+        <Pressable
+          className="mt-3 border border-gray-200 rounded-2xl px-6 py-3"
+          onPress={async () => {
+            await logoutUser();
+            router.replace("/login");
+          }}
+        >
+          <Text className="text-gray-900 font-semibold">Logout</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   return (
     <Tabs
       screenOptions={{

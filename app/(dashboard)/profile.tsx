@@ -16,12 +16,19 @@ import React, { useCallback, useMemo, useState } from "react";
 import {
   Alert,
   ScrollView,
+  Switch,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  confirmBiometric,
+  ensureBiometricAvailable,
+  getBiometricEnabled,
+  setBiometricEnabled,
+} from "@/services/biometricService";
 
 const Profile = () => {
   const insets = useSafeAreaInsets();
@@ -39,6 +46,9 @@ const Profile = () => {
   const [txType, setTxType] = useState<TransactionType>("income");
   const [txAmount, setTxAmount] = useState("");
   const [txNote, setTxNote] = useState("");
+
+  const [biometricEnabled, setBiometricEnabledState] =
+    useState<boolean>(false);
 
   const displayName =
     user?.displayName ||
@@ -79,6 +89,57 @@ const Profile = () => {
   React.useEffect(() => {
     refresh();
   }, [refresh]);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!user?.uid) return;
+      try {
+        const enabled = await getBiometricEnabled(user.uid);
+        if (!cancelled) setBiometricEnabledState(enabled);
+      } catch {
+        // ignore
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.uid]);
+
+  const handleToggleBiometric = useCallback(
+    async (next: boolean) => {
+      if (!user?.uid) {
+        Alert.alert("Security", "Please log in again.");
+        return;
+      }
+
+      if (isLoading) return;
+
+      if (next) {
+        const available = await ensureBiometricAvailable();
+        if (!available.ok) {
+          Alert.alert("Fingerprint", available.reason || "Unavailable");
+          return;
+        }
+
+        const ok = await confirmBiometric("Confirm fingerprint to enable");
+        if (!ok) {
+          Alert.alert("Fingerprint", "Confirmation cancelled");
+          return;
+        }
+      }
+
+      setBiometricEnabledState(next);
+      try {
+        await setBiometricEnabled(user.uid, next);
+      } catch (e: any) {
+        setBiometricEnabledState(!next);
+        Alert.alert("Security", e?.message || "Failed to save setting");
+      }
+    },
+    [isLoading, user?.uid],
+  );
 
   const parseExp = (exp: string) => {
     const trimmed = String(exp).trim();
@@ -196,6 +257,22 @@ const Profile = () => {
             Income: {formatMoney(summary?.totalIncome ?? 0)} • Expense:{" "}
             {formatMoney(summary?.totalExpense ?? 0)}
           </Text>
+        </View>
+
+        <View className="mt-4 bg-white rounded-3xl border border-gray-200 p-5">
+          <Text className="text-lg font-semibold text-gray-900">Security</Text>
+          <View className="flex-row items-center justify-between mt-4">
+            <View className="flex-1 pr-4">
+              <Text className="text-gray-900 font-medium">Use fingerprint</Text>
+              <Text className="text-xs text-gray-500 mt-1">
+                Ask for fingerprint when opening the app
+              </Text>
+            </View>
+            <Switch
+              value={biometricEnabled}
+              onValueChange={handleToggleBiometric}
+            />
+          </View>
         </View>
 
         <View className="mt-4 bg-white rounded-3xl border border-gray-200 p-5">
