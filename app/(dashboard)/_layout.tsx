@@ -181,19 +181,7 @@ const DashboardLayout = () => {
             ),
           }}
         />
-      ))}
-      {/* <Tabs.Screen
-        name="home"
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="home" color={color} size={size} />
-          )
-        }}
-      /> */}
-      {/* home.tsx */}
-      {/* <Tabs.Screen name="tasks" /> tasks.tsx */}
-      {/* <Tabs.Screen name="news" /> news.tsx */}
-      {/* <Tabs.Screen name="profile" /> profile.tsx */}
+      ))}   
     </Tabs>
   );
 };
