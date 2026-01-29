@@ -1,10 +1,10 @@
 import { useAuth } from "@/hooks/useAuth";
 import { logoutUser } from "@/services/authService";
 import {
-  confirmBiometric,
-  consumeBiometricJustEnabled,
-  ensureBiometricAvailable,
-  getBiometricEnabled,
+    confirmBiometric,
+    consumeBiometricJustEnabled,
+    ensureBiometricAvailable,
+    getBiometricEnabled,
 } from "@/services/biometricService";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
@@ -15,7 +15,6 @@ const tabs = [
   { name: "home", icon: "home", title: "Home" },
   { name: "news", icon: "article", title: "News" },
   { name: "profile", icon: "person", title: "Profile" },
-  { name: "tasks", icon: "list", title: "Tasks" },
 ] as const;
 // DRY - Don't Repeat Yourself
 const DashboardLayout = () => {
@@ -181,7 +180,7 @@ const DashboardLayout = () => {
             ),
           }}
         />
-      ))}   
+      ))}
     </Tabs>
   );
 };

@@ -13,11 +13,7 @@ import {
   listFinanceCards,
   setDefaultFinanceCard,
 } from "@/services/financeService";
-import type {
-  FinanceCard,
-  FinanceSummary,
-  TransactionType,
-} from "@/types/finance";
+import type { FinanceCard, FinanceSummary } from "@/types/finance";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   Alert,
@@ -43,9 +39,8 @@ const Profile = () => {
   const [cardLast4, setCardLast4] = useState("");
   const [cardExp, setCardExp] = useState("05/25");
 
-  const [txType, setTxType] = useState<TransactionType>("income");
-  const [txAmount, setTxAmount] = useState("");
-  const [txNote, setTxNote] = useState("");
+  const [salaryAmount, setSalaryAmount] = useState("");
+  const [salaryNote, setSalaryNote] = useState("");
 
   const [biometricEnabled, setBiometricEnabledState] = useState<boolean>(false);
 
@@ -204,28 +199,28 @@ const Profile = () => {
     [hideLoader, isLoading, refresh, showLoader],
   );
 
-  const handleAddTransaction = useCallback(async () => {
+  const handleAddSalary = useCallback(async () => {
     if (isLoading) return;
-    const amount = Number(txAmount);
+    const amount = Number(salaryAmount);
     if (!Number.isFinite(amount) || amount <= 0) {
-      Alert.alert("Transaction", "Enter a valid amount");
+      Alert.alert("Salary", "Enter a valid amount");
       return;
     }
 
     showLoader();
     try {
       await addFinanceTransaction({
-        type: txType,
+        type: "income",
         amount,
-        note: txNote,
+        note: salaryNote,
         cardId: summary?.defaultCard?.id,
       });
-      setTxAmount("");
-      setTxNote("");
+      setSalaryAmount("");
+      setSalaryNote("");
       await refresh();
-      Alert.alert("Transaction", "Saved");
+      Alert.alert("Salary", "Saved");
     } catch (e: any) {
-      Alert.alert("Transaction", e?.message || "Failed to save");
+      Alert.alert("Salary", e?.message || "Failed to save");
     } finally {
       hideLoader();
     }
@@ -233,11 +228,10 @@ const Profile = () => {
     hideLoader,
     isLoading,
     refresh,
+    salaryAmount,
+    salaryNote,
     showLoader,
     summary?.defaultCard?.id,
-    txAmount,
-    txNote,
-    txType,
   ]);
 
   return (
@@ -275,154 +269,14 @@ const Profile = () => {
         </View>
 
         <View className="mt-4 bg-white rounded-3xl border border-gray-200 p-5">
-          <Text className="text-lg font-semibold text-gray-900">Add card</Text>
-
-          <Text className="text-xs text-gray-500 mt-3">Label</Text>
-          <TextInput
-            value={cardLabel}
-            onChangeText={setCardLabel}
-            className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
-            placeholder="Main Card"
-            placeholderTextColor="#9CA3AF"
-          />
-
-          <Text className="text-xs text-gray-500 mt-3">Brand</Text>
-          <View className="flex-row mt-2">
-            {(["VISA", "MASTERCARD", "AMEX", "OTHER"] as const).map((b) => {
-              const active = cardBrand === b;
-              return (
-                <TouchableOpacity
-                  key={b}
-                  className={`mr-2 px-3 py-2 rounded-full border ${
-                    active
-                      ? "bg-gray-900 border-gray-900"
-                      : "bg-white border-gray-200"
-                  }`}
-                  onPress={() => setCardBrand(b)}
-                >
-                  <Text className={active ? "text-white" : "text-gray-700"}>
-                    {b}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-
-          <View className="flex-row mt-3">
-            <View className="flex-1 mr-2">
-              <Text className="text-xs text-gray-500">Last 4 digits</Text>
-              <TextInput
-                value={cardLast4}
-                onChangeText={setCardLast4}
-                keyboardType="number-pad"
-                maxLength={4}
-                className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
-                placeholder="9877"
-                placeholderTextColor="#9CA3AF"
-              />
-            </View>
-            <View className="flex-1 ml-2">
-              <Text className="text-xs text-gray-500">Expiry (MM/YY)</Text>
-              <TextInput
-                value={cardExp}
-                onChangeText={setCardExp}
-                className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
-                placeholder="05/25"
-                placeholderTextColor="#9CA3AF"
-              />
-            </View>
-          </View>
-
-          <TouchableOpacity
-            onPress={handleAddCard}
-            className="mt-4 bg-gray-900 rounded-2xl py-3 items-center"
-          >
-            <Text className="text-white font-semibold">Save card</Text>
-          </TouchableOpacity>
-
-          <Text className="text-sm font-semibold text-gray-900 mt-6">
-            Your cards
-          </Text>
-          {cards.length === 0 ? (
-            <Text className="text-gray-500 mt-2">No cards yet.</Text>
-          ) : (
-            cards.map((c) => (
-              <TouchableOpacity
-                key={c.id}
-                onPress={() => handleSetDefault(c.id)}
-                className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3"
-              >
-                <View className="flex-row justify-between items-center">
-                  <View>
-                    <Text className="text-gray-900 font-semibold">
-                      {c.label} • {c.brand}
-                    </Text>
-                    <Text className="text-gray-500">
-                      •••• {c.last4} • {String(c.expMonth).padStart(2, "0")}/
-                      {String(c.expYear).slice(-2)}
-                    </Text>
-                  </View>
-                  {c.isDefault ? (
-                    <Text className="text-xs text-green-700 font-semibold">
-                      Default
-                    </Text>
-                  ) : (
-                    <Text className="text-xs text-gray-500">Set default</Text>
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))
-          )}
-        </View>
-
-        <View className="mt-4 bg-white rounded-3xl border border-gray-200 p-5">
           <Text className="text-lg font-semibold text-gray-900">
-            Add salary / expense
+            Add salary
           </Text>
-
-          <View className="flex-row mt-3">
-            <TouchableOpacity
-              className={`flex-1 mr-2 rounded-2xl py-3 items-center border ${
-                txType === "income"
-                  ? "bg-emerald-700 border-emerald-700"
-                  : "bg-white border-gray-200"
-              }`}
-              onPress={() => setTxType("income")}
-            >
-              <Text
-                className={
-                  txType === "income"
-                    ? "text-white font-semibold"
-                    : "text-gray-700 font-semibold"
-                }
-              >
-                Salary (Income)
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className={`flex-1 ml-2 rounded-2xl py-3 items-center border ${
-                txType === "expense"
-                  ? "bg-red-600 border-red-600"
-                  : "bg-white border-gray-200"
-              }`}
-              onPress={() => setTxType("expense")}
-            >
-              <Text
-                className={
-                  txType === "expense"
-                    ? "text-white font-semibold"
-                    : "text-gray-700 font-semibold"
-                }
-              >
-                Expense
-              </Text>
-            </TouchableOpacity>
-          </View>
 
           <Text className="text-xs text-gray-500 mt-3">Amount</Text>
           <TextInput
-            value={txAmount}
-            onChangeText={setTxAmount}
+            value={salaryAmount}
+            onChangeText={setSalaryAmount}
             keyboardType="decimal-pad"
             className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
             placeholder="1000"
@@ -431,15 +285,15 @@ const Profile = () => {
 
           <Text className="text-xs text-gray-500 mt-3">Note (optional)</Text>
           <TextInput
-            value={txNote}
-            onChangeText={setTxNote}
+            value={salaryNote}
+            onChangeText={setSalaryNote}
             className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
-            placeholder="Food, bus, etc"
+            placeholder="January salary"
             placeholderTextColor="#9CA3AF"
           />
 
           <TouchableOpacity
-            onPress={handleAddTransaction}
+            onPress={handleAddSalary}
             className="mt-4 bg-gray-900 rounded-2xl py-3 items-center"
           >
             <Text className="text-white font-semibold">Save</Text>

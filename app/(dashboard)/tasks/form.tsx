@@ -1,63 +1,105 @@
+import { useLoader } from "@/hooks/useLoader";
+import { addTask, getTaskById, updateTask } from "@/services/taskService";
+import { Task } from "@/types/task";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Pressable,
-  Alert
-} from "react-native"
-import React, { useEffect, useState } from "react"
-import { MaterialIcons } from "@expo/vector-icons"
-import { useLoader } from "@/hooks/useLoader"
-import { useLocalSearchParams, useRouter } from "expo-router"
-import { addTask, getTaskById, updateTask } from "@/services/taskService"
-import { Task } from "@/types/task"
+    Alert,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 const TaskForm = () => {
-  const router = useRouter()
-  const { taskId } = useLocalSearchParams()
-  const { showLoader, hideLoader, isLoading } = useLoader()
+  const router = useRouter();
+  const { taskId } = useLocalSearchParams();
+  const { showLoader, hideLoader, isLoading } = useLoader();
 
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState("");
+
+  const categories = [
+    "Food",
+    "Transport",
+    "Bills",
+    "Shopping",
+    "Entertainment",
+    "Other",
+  ];
 
   useEffect(() => {
     if (taskId) {
-      showLoader()
+      showLoader();
       getTaskById(taskId as string)
         .then((task: Task) => {
-          setTitle(task.title)
-          setDescription(task.description || "")
+          setTitle(task.title);
+          setDescription(task.description || "");
+          setAmount(
+            typeof task.amount === "number" && task.amount > 0
+              ? String(task.amount)
+              : "",
+          );
+          setCategory(task.category || "");
         })
         .catch(() => Alert.alert("Error", "Failed to load task"))
-        .finally(() => hideLoader())
+        .finally(() => hideLoader());
     }
-  }, [taskId])
+  }, [taskId]);
 
   const handleSubmit = async () => {
-    if (isLoading) return
+    if (isLoading) return;
     if (!title.trim() || !description.trim()) {
-      Alert.alert("Error", "Please fill all fields")
-      return
+      Alert.alert("Error", "Please fill all fields");
+      return;
     }
 
-    showLoader()
+    const trimmedAmount = amount.trim();
+    const parsedAmount = trimmedAmount ? Number(trimmedAmount) : undefined;
+    if (
+      trimmedAmount &&
+      (!Number.isFinite(parsedAmount) || parsedAmount <= 0)
+    ) {
+      Alert.alert("Error", "Enter a valid expense amount");
+      return;
+    }
+
+    const trimmedCategory = category.trim();
+
+    showLoader();
     try {
       if (taskId) {
-        await updateTask(taskId as string, title, description)
-        Alert.alert("Success", "Task updated successfully")
+        await updateTask(
+          taskId as string,
+          title,
+          description,
+          parsedAmount,
+          trimmedCategory || undefined,
+          trimmedAmount ? new Date().toISOString() : undefined,
+        );
+        Alert.alert("Success", "Task updated successfully");
       } else {
-        await addTask(title, description)
-        Alert.alert("Success", "Task added successfully")
+        await addTask(
+          title,
+          description,
+          parsedAmount,
+          trimmedCategory || undefined,
+          trimmedAmount ? new Date().toISOString() : undefined,
+        );
+        Alert.alert("Success", "Task added successfully");
       }
-      router.back()
+      router.back();
     } catch (err: any) {
-      Alert.alert("Error", err.message || "Something went wrong")
+      Alert.alert("Error", err.message || "Something went wrong");
     } finally {
-      hideLoader()
+      hideLoader();
     }
-  }
+  };
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 24 }}>
@@ -93,6 +135,51 @@ const TaskForm = () => {
           className="mb-6 p-4 rounded-xl bg-gray-100 text-gray-800 border border-gray-300 text-base font-medium h-32"
         />
 
+        <Text className="text-gray-800 text-lg font-semibold mb-2">
+          Expense Amount
+        </Text>
+        <TextInput
+          placeholder="Enter amount (e.g. 1500)"
+          placeholderTextColor="#999"
+          value={amount}
+          onChangeText={setAmount}
+          keyboardType="decimal-pad"
+          className="mb-5 p-4 rounded-xl bg-gray-100 text-gray-800 border border-gray-300 text-base font-medium"
+        />
+
+        <Text className="text-gray-800 text-lg font-semibold mb-2">
+          Category
+        </Text>
+
+        <View className="flex-row flex-wrap mb-3">
+          {categories.map((c) => {
+            const active = category.trim().toLowerCase() === c.toLowerCase();
+            return (
+              <TouchableOpacity
+                key={c}
+                className={`mr-2 mb-2 px-4 py-2 rounded-full border ${
+                  active
+                    ? "bg-gray-900 border-gray-900"
+                    : "bg-white border-gray-300"
+                }`}
+                onPress={() => setCategory(c)}
+              >
+                <Text className={active ? "text-white" : "text-gray-700"}>
+                  {c}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        <TextInput
+          placeholder="Type a category (optional)"
+          placeholderTextColor="#999"
+          value={category}
+          onChangeText={setCategory}
+          className="mb-6 p-4 rounded-xl bg-gray-100 text-gray-800 border border-gray-300 text-base font-medium"
+        />
+
         <Pressable
           className={`px-6 py-3 rounded-2xl ${
             taskId ? "bg-blue-600/80" : "bg-green-600/80"
@@ -105,7 +192,7 @@ const TaskForm = () => {
         </Pressable>
       </View>
     </ScrollView>
-  )
-}
+  );
+};
 
-export default TaskForm
+export default TaskForm;
