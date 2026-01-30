@@ -17,6 +17,7 @@ const tabs = [
   { name: "home", icon: "home", title: "Home" },
   { name: "news", icon: "article", title: "News" },
   { name: "profile", icon: "person", title: "Profile" },
+  { name: "tasks", icon: "assignment", title: "Tasks" },
 ] as const;
 // DRY - Don't Repeat Yourself
 const DashboardLayout = () => {
