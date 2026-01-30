@@ -54,6 +54,9 @@ const Profile = () => {
 
   const [profileName, setProfileName] = useState("");
   const [profilePhoto, setProfilePhoto] = useState<string>("");
+  const [initialProfileName, setInitialProfileName] = useState("");
+  const [initialProfilePhoto, setInitialProfilePhoto] = useState<string>("");
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -109,12 +112,19 @@ const Profile = () => {
       try {
         const p = await getUserProfile(user.uid);
         if (cancelled) return;
-        setProfileName((p?.name || user.displayName || "").trim());
-        setProfilePhoto(String(p?.photoBase64 || ""));
+        const nextName = (p?.name || user.displayName || "").trim();
+        const nextPhoto = String(p?.photoBase64 || "");
+        setProfileName(nextName);
+        setProfilePhoto(nextPhoto);
+        setInitialProfileName(nextName);
+        setInitialProfilePhoto(nextPhoto);
       } catch {
         if (cancelled) return;
-        setProfileName(String(user?.displayName || "").trim());
+        const nextName = String(user?.displayName || "").trim();
+        setProfileName(nextName);
         setProfilePhoto("");
+        setInitialProfileName(nextName);
+        setInitialProfilePhoto("");
       }
     })();
 
@@ -326,12 +336,13 @@ const Profile = () => {
 
   const handlePhotoPress = useCallback(() => {
     if (isLoading) return;
+    if (!isEditingProfile) return;
     Alert.alert("Photo", "Select a photo source", [
       { text: "Cancel", style: "cancel" },
       { text: "Gallery", onPress: pickProfilePhoto },
       { text: "Camera", onPress: takeProfilePhoto },
     ]);
-  }, [isLoading, pickProfilePhoto, takeProfilePhoto]);
+  }, [isEditingProfile, isLoading, pickProfilePhoto, takeProfilePhoto]);
 
   const handleSaveProfile = useCallback(async () => {
     if (!user?.uid) {
@@ -339,6 +350,7 @@ const Profile = () => {
       return;
     }
     if (isLoading) return;
+    if (!isEditingProfile) return;
 
     const nextName = profileName.trim();
     if (!nextName) {
@@ -352,13 +364,49 @@ const Profile = () => {
         name: nextName,
         photoBase64: profilePhoto || "",
       });
-      Alert.alert("Profile", "Saved");
+      setInitialProfileName(nextName);
+      setInitialProfilePhoto(profilePhoto || "");
+      setIsEditingProfile(false);
+      Alert.alert("Profile", "Updated");
     } catch (e: any) {
       Alert.alert("Profile", e?.message || "Failed to save");
     } finally {
       hideLoader();
     }
-  }, [hideLoader, isLoading, profileName, profilePhoto, showLoader, user?.uid]);
+  }, [
+    hideLoader,
+    isEditingProfile,
+    isLoading,
+    profileName,
+    profilePhoto,
+    showLoader,
+    user?.uid,
+  ]);
+
+  const handleStartEdit = useCallback(() => {
+    if (isLoading) return;
+    setIsEditingProfile(true);
+  }, [isLoading]);
+
+  const handleCancelEdit = useCallback(() => {
+    if (isLoading) return;
+    setProfileName(initialProfileName);
+    setProfilePhoto(initialProfilePhoto);
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+    setIsEditingProfile(false);
+  }, [
+    initialProfileName,
+    initialProfilePhoto,
+    isLoading,
+    setConfirmPassword,
+    setCurrentPassword,
+    setNewPassword,
+  ]);
 
   const handleChangePassword = useCallback(async () => {
     if (isLoading) return;
@@ -366,6 +414,7 @@ const Profile = () => {
       Alert.alert("Password", "Please log in again.");
       return;
     }
+    if (!isEditingProfile) return;
 
     const cur = currentPassword;
     const next = newPassword;
@@ -417,23 +466,39 @@ const Profile = () => {
           <Text className="text-lg font-semibold text-gray-900 mt-1">
             {displayName}
           </Text>
-          <Text className="text-xs text-gray-500 mt-4">Current balance</Text>
-          <Text className="text-3xl font-semibold text-gray-900 mt-1">
-            {balanceText}
-          </Text>
           <Text className="text-xs text-gray-500 mt-2">
-            Income: {formatMoney(summary?.totalIncome ?? 0)} • Expense:{" "}
-            {formatMoney(summary?.totalExpense ?? 0)}
+            {user?.email || ""}
           </Text>
         </View>
 
         <View className="mt-4 bg-white rounded-3xl border border-gray-200 p-5">
-          <Text className="text-lg font-semibold text-gray-900">Profile</Text>
+          <View className="flex-row items-center justify-between">
+            <Text className="text-lg font-semibold text-gray-900">Profile</Text>
+
+            {isEditingProfile ? (
+              <TouchableOpacity
+                accessibilityRole="button"
+                onPress={handleCancelEdit}
+                className="px-4 py-2 rounded-2xl border border-gray-200"
+              >
+                <Text className="text-gray-900 font-semibold">Cancel</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                accessibilityRole="button"
+                onPress={handleStartEdit}
+                className="px-4 py-2 rounded-2xl bg-gray-900"
+              >
+                <Text className="text-white font-semibold">Edit profile</Text>
+              </TouchableOpacity>
+            )}
+          </View>
 
           <View className="flex-row items-center mt-4">
             <TouchableOpacity
               accessibilityRole="button"
               onPress={handlePhotoPress}
+              disabled={!isEditingProfile}
               activeOpacity={0.8}
               className="w-20 h-20 rounded-3xl bg-gray-100 border border-gray-200 overflow-hidden items-center justify-center relative"
             >
@@ -460,29 +525,44 @@ const Profile = () => {
             <View className="flex-1 ml-4">
               <Text className="text-gray-900 font-semibold">Profile photo</Text>
               <Text className="text-gray-500 text-xs mt-1">
-                {profilePhoto
-                  ? "Tap to change your photo"
-                  : "Tap to add a photo"}
+                {isEditingProfile
+                  ? profilePhoto
+                    ? "Tap to change your photo"
+                    : "Tap to add a photo"
+                  : "Tap Edit profile to change"}
               </Text>
             </View>
           </View>
 
-          <Text className="text-xs text-gray-500 mt-4">Name</Text>
-          <TextInput
-            value={profileName}
-            onChangeText={setProfileName}
-            className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
-            placeholder="Your name"
-            placeholderTextColor="#9CA3AF"
-          />
+          <Text className="text-xs text-gray-500 mt-4">Current balance</Text>
+          <Text className="text-3xl font-semibold text-gray-900 mt-1">
+            {balanceText}
+          </Text>
+          <Text className="text-xs text-gray-500 mt-2">
+            Income: {formatMoney(summary?.totalIncome ?? 0)} • Expense:{" "}
+            {formatMoney(summary?.totalExpense ?? 0)}
+          </Text>
 
-          <TouchableOpacity
-            accessibilityRole="button"
-            onPress={handleSaveProfile}
-            className="mt-4 bg-gray-900 rounded-2xl py-3 items-center"
-          >
-            <Text className="text-white font-semibold">Save profile</Text>
-          </TouchableOpacity>
+          {isEditingProfile ? (
+            <>
+              <Text className="text-xs text-gray-500 mt-5">Name</Text>
+              <TextInput
+                value={profileName}
+                onChangeText={setProfileName}
+                className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
+                placeholder="Your name"
+                placeholderTextColor="#9CA3AF"
+              />
+
+              <TouchableOpacity
+                accessibilityRole="button"
+                onPress={handleSaveProfile}
+                className="mt-4 bg-gray-900 rounded-2xl py-3 items-center"
+              >
+                <Text className="text-white font-semibold">Save changes</Text>
+              </TouchableOpacity>
+            </>
+          ) : null}
         </View>
 
         <View className="mt-4 bg-white rounded-3xl border border-gray-200 p-5">
@@ -500,97 +580,103 @@ const Profile = () => {
             />
           </View>
 
-          <View className="mt-5 pt-5 border-t border-gray-200">
-            <Text className="text-gray-900 font-medium">Change password</Text>
+          {isEditingProfile ? (
+            <View className="mt-5 pt-5 border-t border-gray-200">
+              <Text className="text-gray-900 font-medium">Change password</Text>
 
-            <Text className="text-xs text-gray-500 mt-3">Current password</Text>
-            <View className="mt-2 flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4">
-              <MaterialIcons name="lock" size={20} color="#6B7280" />
-              <TextInput
-                value={currentPassword}
-                onChangeText={setCurrentPassword}
-                placeholder="Current password"
-                placeholderTextColor="#9CA3AF"
-                secureTextEntry={!showCurrentPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-                className="flex-1 py-3 px-3 text-gray-900"
-                textContentType="password"
-              />
-              <TouchableOpacity
-                onPress={() => setShowCurrentPassword((v) => !v)}
-                className="py-2 pl-2"
-              >
-                <MaterialIcons
-                  name={showCurrentPassword ? "visibility" : "visibility-off"}
-                  size={20}
-                  color="#6B7280"
+              <Text className="text-xs text-gray-500 mt-3">
+                Current password
+              </Text>
+              <View className="mt-2 flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4">
+                <MaterialIcons name="lock" size={20} color="#6B7280" />
+                <TextInput
+                  value={currentPassword}
+                  onChangeText={setCurrentPassword}
+                  placeholder="Current password"
+                  placeholderTextColor="#9CA3AF"
+                  secureTextEntry={!showCurrentPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  className="flex-1 py-3 px-3 text-gray-900"
+                  textContentType="password"
                 />
+                <TouchableOpacity
+                  onPress={() => setShowCurrentPassword((v) => !v)}
+                  className="py-2 pl-2"
+                >
+                  <MaterialIcons
+                    name={showCurrentPassword ? "visibility" : "visibility-off"}
+                    size={20}
+                    color="#6B7280"
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <Text className="text-xs text-gray-500 mt-4">New password</Text>
+              <View className="mt-2 flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4">
+                <MaterialIcons name="lock" size={20} color="#6B7280" />
+                <TextInput
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  placeholder="New password"
+                  placeholderTextColor="#9CA3AF"
+                  secureTextEntry={!showNewPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  className="flex-1 py-3 px-3 text-gray-900"
+                  textContentType="newPassword"
+                />
+                <TouchableOpacity
+                  onPress={() => setShowNewPassword((v) => !v)}
+                  className="py-2 pl-2"
+                >
+                  <MaterialIcons
+                    name={showNewPassword ? "visibility" : "visibility-off"}
+                    size={20}
+                    color="#6B7280"
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <Text className="text-xs text-gray-500 mt-4">
+                Confirm new password
+              </Text>
+              <View className="mt-2 flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4">
+                <MaterialIcons name="lock" size={20} color="#6B7280" />
+                <TextInput
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  placeholder="Confirm new password"
+                  placeholderTextColor="#9CA3AF"
+                  secureTextEntry={!showConfirmPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  className="flex-1 py-3 px-3 text-gray-900"
+                  textContentType="password"
+                />
+                <TouchableOpacity
+                  onPress={() => setShowConfirmPassword((v) => !v)}
+                  className="py-2 pl-2"
+                >
+                  <MaterialIcons
+                    name={showConfirmPassword ? "visibility" : "visibility-off"}
+                    size={20}
+                    color="#6B7280"
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity
+                accessibilityRole="button"
+                onPress={handleChangePassword}
+                className="mt-4 bg-gray-900 rounded-2xl py-3 items-center"
+              >
+                <Text className="text-white font-semibold">
+                  Update password
+                </Text>
               </TouchableOpacity>
             </View>
-
-            <Text className="text-xs text-gray-500 mt-4">New password</Text>
-            <View className="mt-2 flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4">
-              <MaterialIcons name="lock" size={20} color="#6B7280" />
-              <TextInput
-                value={newPassword}
-                onChangeText={setNewPassword}
-                placeholder="New password"
-                placeholderTextColor="#9CA3AF"
-                secureTextEntry={!showNewPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-                className="flex-1 py-3 px-3 text-gray-900"
-                textContentType="newPassword"
-              />
-              <TouchableOpacity
-                onPress={() => setShowNewPassword((v) => !v)}
-                className="py-2 pl-2"
-              >
-                <MaterialIcons
-                  name={showNewPassword ? "visibility" : "visibility-off"}
-                  size={20}
-                  color="#6B7280"
-                />
-              </TouchableOpacity>
-            </View>
-
-            <Text className="text-xs text-gray-500 mt-4">
-              Confirm new password
-            </Text>
-            <View className="mt-2 flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4">
-              <MaterialIcons name="lock" size={20} color="#6B7280" />
-              <TextInput
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                placeholder="Confirm new password"
-                placeholderTextColor="#9CA3AF"
-                secureTextEntry={!showConfirmPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-                className="flex-1 py-3 px-3 text-gray-900"
-                textContentType="password"
-              />
-              <TouchableOpacity
-                onPress={() => setShowConfirmPassword((v) => !v)}
-                className="py-2 pl-2"
-              >
-                <MaterialIcons
-                  name={showConfirmPassword ? "visibility" : "visibility-off"}
-                  size={20}
-                  color="#6B7280"
-                />
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity
-              accessibilityRole="button"
-              onPress={handleChangePassword}
-              className="mt-4 bg-gray-900 rounded-2xl py-3 items-center"
-            >
-              <Text className="text-white font-semibold">Update password</Text>
-            </TouchableOpacity>
-          </View>
+          ) : null}
         </View>
 
         <View className="mt-4 bg-white rounded-3xl border border-gray-200 p-5">
