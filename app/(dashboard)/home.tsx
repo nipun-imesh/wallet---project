@@ -1,23 +1,15 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useLoader } from "@/hooks/useLoader";
 import {
-  deleteFinanceTransaction,
   getFinanceSummary,
   listFinanceTransactions,
-  updateFinanceTransaction,
 } from "@/services/financeService";
 import type { FinanceSummary, FinanceTransaction } from "@/types/finance";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { router, useFocusEffect } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View
-} from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Circle, G, Path } from "react-native-svg";
 
@@ -87,28 +79,6 @@ const Home = () => {
   const [monthSlices, setMonthSlices] = useState<Slice[]>([]);
   const [monthTotalBase, setMonthTotalBase] = useState(0);
   const [recentTx, setRecentTx] = useState<FinanceTransaction[]>([]);
-
-  const [editingTxId, setEditingTxId] = useState<string | null>(null);
-  const [editAmount, setEditAmount] = useState("");
-  const [editCategory, setEditCategory] = useState("Other");
-  const [editNote, setEditNote] = useState("");
-
-  const expenseCategories = [
-    "Food & Drinks",
-    "Transport",
-    "Bills",
-    "Shopping",
-    "Groceries",
-    "Entertainment",
-    "Health",
-    "Education",
-    "Rent",
-    "Travel",
-    "Personal Care",
-    "Gifts & Donations",
-    "EMI / Loans",
-    "Other",
-  ];
 
   const salaryLabel = "Balance";
 
@@ -188,21 +158,40 @@ const Home = () => {
         return;
       }
 
+      // Colorful palette (Tailwind-like) for category slices.
+      // Kept as a fixed list so category->color is stable via hashing.
       const palette = [
-        "#111827", // gray-900
-        "#6B7280", // gray-500
-        "#9CA3AF", // gray-400
-        "#E6F4FE", // from app.json
+        "#2563EB", // blue-600
+        "#0EA5E9", // sky-500
+        "#14B8A6", // teal-500
+        "#22C55E", // green-500
+        "#F59E0B", // amber-500
+        "#F97316", // orange-500
+        "#EF4444", // red-500
+        "#8B5CF6", // violet-500
+        "#EC4899", // pink-500
+        "#10B981", // emerald-500
+        "#06B6D4", // cyan-500
+        "#A855F7", // purple-500
       ];
+
+      const pickColor = (label: string) => {
+        let hash = 0;
+        for (let i = 0; i < label.length; i++) {
+          hash = (hash * 31 + label.charCodeAt(i)) | 0;
+        }
+        const idx = Math.abs(hash) % palette.length;
+        return palette[idx];
+      };
 
       const sorted = [...byCategory.entries()]
         .sort((a, b) => b[1] - a[1])
         .slice(0, 6);
 
-      const slices: Slice[] = sorted.map(([label, value], idx) => ({
+      const slices: Slice[] = sorted.map(([label, value]) => ({
         label,
         value,
-        color: palette[idx % palette.length],
+        color: pickColor(label),
       }));
 
       if (income > 0) {
@@ -211,7 +200,7 @@ const Home = () => {
           slices.push({
             label: "Remaining",
             value: remaining,
-            color: "#D1D5DB" as any,
+            color: "#D1D5DB",
           });
         }
       }
@@ -221,79 +210,6 @@ const Home = () => {
       hideLoader();
     }
   }, [hideLoader, showLoader, user]);
-
-  const beginEditLatest = useCallback((t: FinanceTransaction) => {
-    const parsed = splitNote(t.note);
-    setEditingTxId(t.id);
-    setEditAmount(String(t.amount ?? ""));
-    if (t.type === "expense") {
-      setEditCategory(parsed.category || "Other");
-      setEditNote(parsed.detail || "");
-    } else {
-      setEditCategory("Other");
-      setEditNote(String(t.note || "").trim());
-    }
-  }, []);
-
-  const handleUpdateLatest = useCallback(
-    async (t: FinanceTransaction) => {
-      const amount = Number(editAmount);
-      if (!Number.isFinite(amount) || amount <= 0) {
-        Alert.alert("Record", "Enter a valid amount");
-        return;
-      }
-
-      showLoader();
-      try {
-        const nextNote =
-          t.type === "expense"
-            ? (() => {
-                const c = String(editCategory || "").trim() || "Other";
-                const d = String(editNote || "").trim();
-                return d ? `${c}|${d}` : c;
-              })()
-            : String(editNote || "").trim();
-
-        await updateFinanceTransaction(t.id, {
-          amount,
-          note: nextNote,
-        });
-        setEditingTxId(null);
-        await fetchSummary();
-        Alert.alert("Record", "Updated");
-      } catch (e: any) {
-        Alert.alert("Record", e?.message || "Failed to update");
-      } finally {
-        hideLoader();
-      }
-    },
-    [editAmount, editCategory, editNote, fetchSummary, hideLoader, showLoader],
-  );
-
-  const handleDeleteLatest = useCallback(
-    async (t: FinanceTransaction) => {
-      Alert.alert("Delete record", "Delete this last record?", [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            showLoader();
-            try {
-              await deleteFinanceTransaction(t.id);
-              setEditingTxId(null);
-              await fetchSummary();
-            } catch (e: any) {
-              Alert.alert("Delete", e?.message || "Failed to delete");
-            } finally {
-              hideLoader();
-            }
-          },
-        },
-      ]);
-    },
-    [fetchSummary, hideLoader, showLoader],
-  );
 
   const donut = useMemo(() => {
     const size = 180;
@@ -321,20 +237,34 @@ const Home = () => {
     let angle = -Math.PI / 2;
     const paths: Array<{ d: string; color: string }> = [];
 
+    const gap = monthSlices.length > 1 ? 0.04 : 0;
+
     for (const s of monthSlices) {
       const frac = s.value / total;
       const sweep = Math.max(0, Math.min(2 * Math.PI, frac * 2 * Math.PI));
-      const end = angle + sweep;
-      if (sweep > 0.0001) {
+      const start = angle + gap / 2;
+      const end = angle + sweep - gap / 2;
+      if (end - start > 0.0001) {
         paths.push({
-          d: makeDonutPath(cx, cy, rOuter, rInner, angle, end),
+          d: makeDonutPath(cx, cy, rOuter, rInner, start, end),
           color: s.color,
         });
       }
-      angle = end;
+      angle = angle + sweep;
     }
 
     return { size, cx, cy, rOuter, rInner, paths };
+  }, [monthSlices, monthTotalBase]);
+
+  const sliceLegend = useMemo(() => {
+    const total = monthTotalBase > 0 ? monthTotalBase : 0;
+    if (!total || monthSlices.length === 0) return [];
+    return monthSlices
+      .filter((s) => s.value > 0)
+      .map((s) => ({
+        ...s,
+        percent: (s.value / total) * 100,
+      }));
   }, [monthSlices, monthTotalBase]);
 
   useFocusEffect(
@@ -426,6 +356,34 @@ const Home = () => {
               </G>
             </Svg>
           </View>
+
+          {sliceLegend.length > 0 ? (
+            <View className="px-5 pb-4">
+              {sliceLegend.map((s, idx) => (
+                <View
+                  key={s.label}
+                  className={
+                    idx === 0
+                      ? "flex-row items-center justify-between py-2"
+                      : "flex-row items-center justify-between py-2 border-t border-gray-100"
+                  }
+                >
+                  <View className="flex-row items-center flex-1 pr-3">
+                    <View
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: s.color }}
+                    />
+                    <Text className="text-gray-700 ml-2" numberOfLines={1}>
+                      {s.label}
+                    </Text>
+                  </View>
+                  <Text className="text-gray-900 font-medium">
+                    {Math.round(s.percent)}%
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
 
           <View className="mt-2 border-t border-gray-100 px-5 py-4">
             <TouchableOpacity

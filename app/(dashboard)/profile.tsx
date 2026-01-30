@@ -1,5 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useLoader } from "@/hooks/useLoader";
+import { logoutUser } from "@/services/authService";
 import {
   confirmBiometric,
   ensureBiometricAvailable,
@@ -8,21 +9,20 @@ import {
 } from "@/services/biometricService";
 import {
   addFinanceCard,
-  addFinanceTransaction,
   getFinanceSummary,
   listFinanceCards,
   setDefaultFinanceCard,
 } from "@/services/financeService";
 import type { FinanceCard, FinanceSummary } from "@/types/finance";
+import { router } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   Alert,
   ScrollView,
   Switch,
   Text,
-  TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -38,9 +38,6 @@ const Profile = () => {
   const [cardBrand, setCardBrand] = useState<FinanceCard["brand"]>("VISA");
   const [cardLast4, setCardLast4] = useState("");
   const [cardExp, setCardExp] = useState("05/25");
-
-  const [salaryAmount, setSalaryAmount] = useState("");
-  const [salaryNote, setSalaryNote] = useState("");
 
   const [biometricEnabled, setBiometricEnabledState] = useState<boolean>(false);
 
@@ -199,40 +196,27 @@ const Profile = () => {
     [hideLoader, isLoading, refresh, showLoader],
   );
 
-  const handleAddSalary = useCallback(async () => {
+  const handleLogout = useCallback(() => {
     if (isLoading) return;
-    const amount = Number(salaryAmount);
-    if (!Number.isFinite(amount) || amount <= 0) {
-      Alert.alert("Salary", "Enter a valid amount");
-      return;
-    }
-
-    showLoader();
-    try {
-      await addFinanceTransaction({
-        type: "income",
-        amount,
-        note: salaryNote,
-        cardId: summary?.defaultCard?.id,
-      });
-      setSalaryAmount("");
-      setSalaryNote("");
-      await refresh();
-      Alert.alert("Salary", "Saved");
-    } catch (e: any) {
-      Alert.alert("Salary", e?.message || "Failed to save");
-    } finally {
-      hideLoader();
-    }
-  }, [
-    hideLoader,
-    isLoading,
-    refresh,
-    salaryAmount,
-    salaryNote,
-    showLoader,
-    summary?.defaultCard?.id,
-  ]);
+    Alert.alert("Log out", "Do you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Log out",
+        style: "destructive",
+        onPress: async () => {
+          showLoader();
+          try {
+            await logoutUser();
+            router.replace("/(auth)/login");
+          } catch (e: any) {
+            Alert.alert("Log out", e?.message || "Failed to log out");
+          } finally {
+            hideLoader();
+          }
+        },
+      },
+    ]);
+  }, [hideLoader, isLoading, showLoader]);
 
   return (
     <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
@@ -269,34 +253,12 @@ const Profile = () => {
         </View>
 
         <View className="mt-4 bg-white rounded-3xl border border-gray-200 p-5">
-          <Text className="text-lg font-semibold text-gray-900">
-            Add salary
-          </Text>
-
-          <Text className="text-xs text-gray-500 mt-3">Amount</Text>
-          <TextInput
-            value={salaryAmount}
-            onChangeText={setSalaryAmount}
-            keyboardType="decimal-pad"
-            className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
-            placeholder="1000"
-            placeholderTextColor="#9CA3AF"
-          />
-
-          <Text className="text-xs text-gray-500 mt-3">Note (optional)</Text>
-          <TextInput
-            value={salaryNote}
-            onChangeText={setSalaryNote}
-            className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
-            placeholder="January salary"
-            placeholderTextColor="#9CA3AF"
-          />
-
           <TouchableOpacity
-            onPress={handleAddSalary}
-            className="mt-4 bg-gray-900 rounded-2xl py-3 items-center"
+            accessibilityRole="button"
+            onPress={handleLogout}
+            className="bg-red-600 rounded-2xl py-3 items-center"
           >
-            <Text className="text-white font-semibold">Save</Text>
+            <Text className="text-white font-semibold">Log out</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

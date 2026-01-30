@@ -5,13 +5,13 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    Alert,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const TaskForm = () => {
@@ -60,13 +60,14 @@ const TaskForm = () => {
     }
 
     const trimmedAmount = amount.trim();
-    const parsedAmount = trimmedAmount ? Number(trimmedAmount) : undefined;
-    if (
-      trimmedAmount &&
-      (!Number.isFinite(parsedAmount) || parsedAmount <= 0)
-    ) {
-      Alert.alert("Error", "Enter a valid expense amount");
-      return;
+    let parsedAmount: number | undefined;
+    if (trimmedAmount) {
+      const n = Number(trimmedAmount);
+      if (!Number.isFinite(n) || n <= 0) {
+        Alert.alert("Error", "Enter a valid expense amount");
+        return;
+      }
+      parsedAmount = n;
     }
 
     const trimmedCategory = category.trim();

@@ -46,6 +46,7 @@ const News = () => {
 
   const [summary, setSummary] = useState<FinanceSummary | null>(null);
   const [history, setHistory] = useState<FinanceTransaction[]>([]);
+  const [entryType, setEntryType] = useState<"expense" | "income">("expense");
   const [txAmount, setTxAmount] = useState("");
   const [txNote, setTxNote] = useState("");
   const [txCategory, setTxCategory] = useState("Other");
@@ -206,27 +207,36 @@ const News = () => {
 
     showLoader();
     try {
-      const category = String(txCategory || "").trim() || "Other";
-      const detail = String(txNote || "").trim();
-      const encodedNote = detail ? `${category}|${detail}` : category;
-
-      await addFinanceTransaction({
-        type: "expense",
-        amount,
-        note: encodedNote,
-        cardId: summary?.defaultCard?.id,
-      });
+      if (entryType === "expense") {
+        const category = String(txCategory || "").trim() || "Other";
+        const detail = String(txNote || "").trim();
+        const encodedNote = detail ? `${category}|${detail}` : category;
+        await addFinanceTransaction({
+          type: "expense",
+          amount,
+          note: encodedNote,
+          cardId: summary?.defaultCard?.id,
+        });
+      } else {
+        await addFinanceTransaction({
+          type: "income",
+          amount,
+          note: String(txNote || "").trim(),
+          cardId: summary?.defaultCard?.id,
+        });
+      }
       setTxAmount("");
       setTxNote("");
-      setTxCategory("Other");
+      if (entryType === "expense") setTxCategory("Other");
       await refreshData();
-      Alert.alert("Transaction", "Saved");
+      Alert.alert("Record", "Saved");
     } catch (e: any) {
-      Alert.alert("Transaction", e?.message || "Failed to save");
+      Alert.alert("Record", e?.message || "Failed to save");
     } finally {
       hideLoader();
     }
   }, [
+    entryType,
     hideLoader,
     isLoading,
     refreshData,
@@ -247,32 +257,78 @@ const News = () => {
       >
         <View className="bg-white rounded-3xl border border-gray-200 p-5">
           <Text className="text-lg font-semibold text-gray-900">
-            Add expense
+            Add record
           </Text>
 
-          <Text className="text-xs text-gray-500 mt-3">Category</Text>
-          <View className="flex-row flex-wrap mt-2">
-            {categories.map((c) => {
-              const active = txCategory === c;
-              return (
-                <TouchableOpacity
-                  key={c}
-                  className={`mr-2 mb-2 px-3 py-2 rounded-full border ${
-                    active
-                      ? "bg-gray-900 border-gray-900"
-                      : "bg-white border-gray-200"
-                  }`}
-                  onPress={() => setTxCategory(c)}
-                >
-                  <Text className={active ? "text-white" : "text-gray-700"}>
-                    {c}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+          <View className="flex-row mt-4">
+            <TouchableOpacity
+              accessibilityRole="button"
+              onPress={() => setEntryType("expense")}
+              className={`flex-1 rounded-2xl py-3 items-center border ${
+                entryType === "expense"
+                  ? "bg-gray-900 border-gray-900"
+                  : "bg-white border-gray-200"
+              }`}
+            >
+              <Text
+                className={
+                  entryType === "expense"
+                    ? "text-white font-semibold"
+                    : "text-gray-900 font-semibold"
+                }
+              >
+                Expense
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              accessibilityRole="button"
+              onPress={() => setEntryType("income")}
+              className={`flex-1 ml-2 rounded-2xl py-3 items-center border ${
+                entryType === "income"
+                  ? "bg-gray-900 border-gray-900"
+                  : "bg-white border-gray-200"
+              }`}
+            >
+              <Text
+                className={
+                  entryType === "income"
+                    ? "text-white font-semibold"
+                    : "text-gray-900 font-semibold"
+                }
+              >
+                Salary
+              </Text>
+            </TouchableOpacity>
           </View>
 
-          <Text className="text-xs text-gray-500 mt-3">Amount</Text>
+          {entryType === "expense" ? (
+            <>
+              <Text className="text-xs text-gray-500 mt-4">Category</Text>
+              <View className="flex-row flex-wrap mt-2">
+                {categories.map((c) => {
+                  const active = txCategory === c;
+                  return (
+                    <TouchableOpacity
+                      key={c}
+                      className={`mr-2 mb-2 px-3 py-2 rounded-full border ${
+                        active
+                          ? "bg-gray-900 border-gray-900"
+                          : "bg-white border-gray-200"
+                      }`}
+                      onPress={() => setTxCategory(c)}
+                    >
+                      <Text className={active ? "text-white" : "text-gray-700"}>
+                        {c}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </>
+          ) : null}
+
+          <Text className="text-xs text-gray-500 mt-4">Amount</Text>
           <TextInput
             value={txAmount}
             onChangeText={setTxAmount}
@@ -287,7 +343,9 @@ const News = () => {
             value={txNote}
             onChangeText={setTxNote}
             className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
-            placeholder="Food, bus, etc"
+            placeholder={
+              entryType === "expense" ? "Food, bus, etc" : "January salary"
+            }
             placeholderTextColor="#9CA3AF"
           />
 
