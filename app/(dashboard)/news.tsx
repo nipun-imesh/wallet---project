@@ -3,8 +3,9 @@ import { useLoader } from "@/hooks/useLoader";
 import {
     addFinanceTransaction,
     getFinanceSummary,
+    listFinanceTransactions,
 } from "@/services/financeService";
-import type { FinanceSummary } from "@/types/finance";
+import type { FinanceSummary, FinanceTransaction } from "@/types/finance";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
@@ -18,6 +19,23 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+const splitNote = (value: string | undefined) => {
+  const raw = String(value || "").trim();
+  if (!raw) return { category: "Other", detail: "" };
+  const pipe = raw.indexOf("|");
+  if (pipe < 0) return { category: raw, detail: "" };
+  return {
+    category: raw.slice(0, pipe).trim() || "Other",
+    detail: raw.slice(pipe + 1).trim(),
+  };
+};
+
+const formatShortDate = (value: string | Date) => {
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+};
+
 const News = () => {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
@@ -25,14 +43,56 @@ const News = () => {
   const { showLoader, hideLoader, isLoading } = useLoader();
 
   const [summary, setSummary] = useState<FinanceSummary | null>(null);
+  const [history, setHistory] = useState<FinanceTransaction[]>([]);
   const [txAmount, setTxAmount] = useState("");
   const [txNote, setTxNote] = useState("");
+  const [txCategory, setTxCategory] = useState("Other");
 
-  const refreshSummary = useCallback(async () => {
+  const formatMoney = useCallback((value: number) => {
+    const safe = Number.isFinite(value) ? value : 0;
+    return safe.toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }, []);
+
+  const categories = [
+    "Food & Drinks",
+    "Transport",
+    "Bills",
+    "Shopping",
+    "Groceries",
+    "Entertainment",
+    "Health",
+    "Education",
+    "Rent",
+    "Travel",
+    "Personal Care",
+    "Gifts & Donations",
+    "EMI / Loans",
+    "Other",
+  ];
+
+  const refreshData = useCallback(async () => {
     if (!user) return;
     try {
-      const s = await getFinanceSummary();
+      const [s, tx] = await Promise.all([
+        getFinanceSummary(),
+        listFinanceTransactions(400),
+      ]);
       setSummary(s);
+
+      const now = new Date();
+      const since = new Date(now);
+      since.setDate(since.getDate() - 31);
+
+      const recent = tx.filter((t) => {
+        const d = new Date(t.createdAt);
+        return !Number.isNaN(d.getTime()) && d >= since;
+      });
+      setHistory(recent);
     } catch {
       // ignore
     }
@@ -40,8 +100,8 @@ const News = () => {
 
   useFocusEffect(
     useCallback(() => {
-      refreshSummary();
-    }, [refreshSummary]),
+      refreshData();
+    }, [refreshData]),
   );
 
   const handleAddTransaction = useCallback(async () => {
@@ -54,15 +114,20 @@ const News = () => {
 
     showLoader();
     try {
+      const category = String(txCategory || "").trim() || "Other";
+      const detail = String(txNote || "").trim();
+      const encodedNote = detail ? `${category}|${detail}` : category;
+
       await addFinanceTransaction({
         type: "expense",
         amount,
-        note: txNote,
+        note: encodedNote,
         cardId: summary?.defaultCard?.id,
       });
       setTxAmount("");
       setTxNote("");
-      await refreshSummary();
+      setTxCategory("Other");
+      await refreshData();
       Alert.alert("Transaction", "Saved");
     } catch (e: any) {
       Alert.alert("Transaction", e?.message || "Failed to save");
@@ -72,10 +137,11 @@ const News = () => {
   }, [
     hideLoader,
     isLoading,
-    refreshSummary,
+    refreshData,
     showLoader,
     summary?.defaultCard?.id,
     txAmount,
+    txCategory,
     txNote,
   ]);
 
@@ -91,6 +157,28 @@ const News = () => {
           <Text className="text-lg font-semibold text-gray-900">
             Add expense
           </Text>
+
+          <Text className="text-xs text-gray-500 mt-3">Category</Text>
+          <View className="flex-row flex-wrap mt-2">
+            {categories.map((c) => {
+              const active = txCategory === c;
+              return (
+                <TouchableOpacity
+                  key={c}
+                  className={`mr-2 mb-2 px-3 py-2 rounded-full border ${
+                    active
+                      ? "bg-gray-900 border-gray-900"
+                      : "bg-white border-gray-200"
+                  }`}
+                  onPress={() => setTxCategory(c)}
+                >
+                  <Text className={active ? "text-white" : "text-gray-700"}>
+                    {c}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
 
           <Text className="text-xs text-gray-500 mt-3">Amount</Text>
           <TextInput
@@ -119,6 +207,68 @@ const News = () => {
               {isLoading ? "Please wait..." : "Save"}
             </Text>
           </TouchableOpacity>
+        </View>
+
+        <View className="mt-4 bg-white rounded-3xl border border-gray-200 overflow-hidden">
+          <View className="px-5 pt-5">
+            <Text className="text-lg font-semibold text-gray-900">
+              Expense / Income history
+            </Text>
+            <Text className="text-xs text-gray-500 tracking-widest mt-2">
+              LAST 31 DAYS
+            </Text>
+          </View>
+
+          <View className="px-5 mt-2">
+            {history.length === 0 ? (
+              <Text className="text-gray-500 py-4">No records yet.</Text>
+            ) : (
+              <View>
+                {history.map((t, idx) => {
+                  const parsed = splitNote(t.note);
+                  const dateText = formatShortDate(t.createdAt);
+                  const subtitle = parsed.detail
+                    ? `${parsed.detail} • ${dateText}`
+                    : dateText;
+                  const title =
+                    t.type === "expense"
+                      ? parsed.category
+                      : parsed.category && parsed.category !== "Other"
+                        ? parsed.category
+                        : "Income";
+                  const amountText = `${t.type === "income" ? "+" : "-"}${formatMoney(Math.abs(t.amount))}`;
+                  return (
+                    <View
+                      key={t.id}
+                      className={
+                        idx === 0
+                          ? "flex-row items-center justify-between py-4"
+                          : "flex-row items-center justify-between py-4 border-t border-gray-100"
+                      }
+                    >
+                      <View className="flex-1 pr-4">
+                        <Text
+                          className="text-gray-900 font-medium"
+                          numberOfLines={1}
+                        >
+                          {title}
+                        </Text>
+                        <Text
+                          className="text-xs text-gray-500 mt-1"
+                          numberOfLines={1}
+                        >
+                          {subtitle}
+                        </Text>
+                      </View>
+                      <Text className="text-gray-900 font-semibold">
+                        {amountText}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+          </View>
         </View>
       </ScrollView>
     </View>

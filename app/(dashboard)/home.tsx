@@ -21,7 +21,24 @@ type Slice = {
 
 const sanitizeCategory = (value: string | undefined) => {
   const v = String(value || "").trim();
-  return v ? v : "Other";
+  if (!v) return "Other";
+  const pipe = v.indexOf("|");
+  if (pipe >= 0) {
+    const left = v.slice(0, pipe).trim();
+    return left ? left : "Other";
+  }
+  return v;
+};
+
+const splitNote = (value: string | undefined) => {
+  const raw = String(value || "").trim();
+  if (!raw) return { category: "Other", detail: "" };
+  const pipe = raw.indexOf("|");
+  if (pipe < 0) return { category: raw, detail: "" };
+  return {
+    category: raw.slice(0, pipe).trim() || "Other",
+    detail: raw.slice(pipe + 1).trim(),
+  };
 };
 
 const makeDonutPath = (
@@ -363,12 +380,18 @@ const Home = () => {
               </View>
             ) : (
               <View>
-                {recentTx.slice(0, 3).map((t, idx) => {
-                  const title = t.note?.trim()
-                    ? t.note.trim()
-                    : t.type === "income"
-                      ? "Income"
-                      : "Expense";
+                {recentTx.slice(0, 5).map((t, idx) => {
+                  const parsed = splitNote(t.note);
+                  const title =
+                    t.type === "income"
+                      ? parsed.category === "Other" &&
+                        !String(t.note || "").trim()
+                        ? "Salary"
+                        : parsed.category
+                      : parsed.category;
+                  const subtitle = parsed.detail
+                    ? parsed.detail
+                    : formatShortDate(t.createdAt);
                   const amountText = `${t.type === "income" ? "+" : "-"}${formatMoney(Math.abs(t.amount))}`;
 
                   return (
@@ -396,7 +419,7 @@ const Home = () => {
                             {title}
                           </Text>
                           <Text className="text-xs text-gray-500 mt-1">
-                            {formatShortDate(t.createdAt)}
+                            {subtitle}
                           </Text>
                         </View>
                       </View>
