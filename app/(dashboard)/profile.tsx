@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useLoader } from "@/hooks/useLoader";
-import { logoutUser } from "@/services/authService";
+import { getUserProfile, logoutUser, updateUserProfile } from "@/services/authService";
 import {
   confirmBiometric,
   ensureBiometricAvailable,
@@ -15,14 +15,17 @@ import {
 } from "@/services/financeService";
 import type { FinanceCard, FinanceSummary } from "@/types/finance";
 import { router } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   Alert,
+  Image,
   ScrollView,
   Switch,
   Text,
   TouchableOpacity,
-  View
+  View,
+  TextInput
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -40,6 +43,9 @@ const Profile = () => {
   const [cardExp, setCardExp] = useState("05/25");
 
   const [biometricEnabled, setBiometricEnabledState] = useState<boolean>(false);
+
+  const [profileName, setProfileName] = useState("");
+  const [profilePhoto, setProfilePhoto] = useState<string>("");
 
   const displayName =
     user?.displayName ||
@@ -80,6 +86,27 @@ const Profile = () => {
   React.useEffect(() => {
     refresh();
   }, [refresh]);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!user?.uid) return;
+      try {
+        const p = await getUserProfile(user.uid);
+        if (cancelled) return;
+        setProfileName((p?.name || user.displayName || "").trim());
+        setProfilePhoto(String(p?.photoBase64 || ""));
+      } catch {
+        if (cancelled) return;
+        setProfileName(String(user?.displayName || "").trim());
+        setProfilePhoto("");
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.displayName, user?.uid]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -218,6 +245,60 @@ const Profile = () => {
     ]);
   }, [hideLoader, isLoading, showLoader]);
 
+  const pickProfilePhoto = useCallback(async () => {
+    if (isLoading) return;
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert("Photo", "Media library permission is required");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.3,
+      base64: true,
+    });
+
+    if (result.canceled) return;
+    const asset = result.assets?.[0];
+    const b64 = asset?.base64;
+    if (!b64) {
+      Alert.alert("Photo", "Failed to read photo");
+      return;
+    }
+    const mime = asset.mimeType || "image/jpeg";
+    setProfilePhoto(`data:${mime};base64,${b64}`);
+  }, [isLoading]);
+
+  const handleSaveProfile = useCallback(async () => {
+    if (!user?.uid) {
+      Alert.alert("Profile", "Please log in again.");
+      return;
+    }
+    if (isLoading) return;
+
+    const nextName = profileName.trim();
+    if (!nextName) {
+      Alert.alert("Profile", "Name is required");
+      return;
+    }
+
+    showLoader();
+    try {
+      await updateUserProfile(user.uid, {
+        name: nextName,
+        photoBase64: profilePhoto || "",
+      });
+      Alert.alert("Profile", "Saved");
+    } catch (e: any) {
+      Alert.alert("Profile", e?.message || "Failed to save");
+    } finally {
+      hideLoader();
+    }
+  }, [hideLoader, isLoading, profileName, profilePhoto, showLoader, user?.uid]);
+
   return (
     <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
@@ -234,6 +315,51 @@ const Profile = () => {
             Income: {formatMoney(summary?.totalIncome ?? 0)} • Expense:{" "}
             {formatMoney(summary?.totalExpense ?? 0)}
           </Text>
+        </View>
+
+        <View className="mt-4 bg-white rounded-3xl border border-gray-200 p-5">
+          <Text className="text-lg font-semibold text-gray-900">Profile</Text>
+
+          <View className="flex-row items-center mt-4">
+            <View className="w-16 h-16 rounded-2xl bg-gray-100 border border-gray-200 overflow-hidden items-center justify-center">
+              {profilePhoto ? (
+                <Image
+                  source={{ uri: profilePhoto }}
+                  style={{ width: 64, height: 64 }}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Text className="text-gray-400 text-2xl font-semibold">
+                  {String(profileName || displayName || "U").trim().slice(0, 1).toUpperCase()}
+                </Text>
+              )}
+            </View>
+
+            <TouchableOpacity
+              accessibilityRole="button"
+              onPress={pickProfilePhoto}
+              className="ml-3 px-4 py-3 rounded-2xl bg-gray-900"
+            >
+              <Text className="text-white font-semibold">Change photo</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text className="text-xs text-gray-500 mt-4">Name</Text>
+          <TextInput
+            value={profileName}
+            onChangeText={setProfileName}
+            className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
+            placeholder="Your name"
+            placeholderTextColor="#9CA3AF"
+          />
+
+          <TouchableOpacity
+            accessibilityRole="button"
+            onPress={handleSaveProfile}
+            className="mt-4 bg-gray-900 rounded-2xl py-3 items-center"
+          >
+            <Text className="text-white font-semibold">Save profile</Text>
+          </TouchableOpacity>
         </View>
 
         <View className="mt-4 bg-white rounded-3xl border border-gray-200 p-5">

@@ -9,9 +9,14 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allow access to camera to take a profile photo.",
+        "NSPhotoLibraryUsageDescription": "Allow access to photos to choose a profile photo."
+      }
     },
     "android": {
+      "permissions": ["CAMERA", "READ_MEDIA_IMAGES"],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

@@ -2,6 +2,7 @@ import { useLoader } from "@/hooks/useLoader";
 import { registerUser } from "@/services/authService";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import {
   Alert,
@@ -41,8 +42,37 @@ const Register = () => {
   const [conPassword, setConPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [photoDataUri, setPhotoDataUri] = useState<string>("");
 
   const { showLoader, hideLoader, isLoading } = useLoader();
+
+  const pickPhoto = async () => {
+    if (isLoading) return;
+
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert("Photo", "Media library permission is required");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.3,
+      base64: true,
+    });
+
+    if (result.canceled) return;
+    const asset = result.assets?.[0];
+    const b64 = asset?.base64;
+    if (!b64) {
+      Alert.alert("Photo", "Failed to read photo");
+      return;
+    }
+    const mime = asset.mimeType || "image/jpeg";
+    setPhotoDataUri(`data:${mime};base64,${b64}`);
+  };
 
   const handleRegister = async () => {
     if (isLoading) return;
@@ -68,7 +98,7 @@ const Register = () => {
     }
     showLoader();
     try {
-      await registerUser(cleanName, cleanEmail, password);
+      await registerUser(cleanName, cleanEmail, password, photoDataUri || undefined);
       Alert.alert("Success", "Account created");
       router.replace("/login");
     } catch (e: any) {
@@ -112,6 +142,27 @@ const Register = () => {
           </View>
 
           <View className="p-7">
+            <Text className="text-gray-800 font-semibold mb-2">Photo</Text>
+            <View className="flex-row items-center">
+              <View className="w-16 h-16 rounded-2xl bg-gray-100 border border-gray-200 overflow-hidden items-center justify-center">
+                {photoDataUri ? (
+                  <Image
+                    source={{ uri: photoDataUri }}
+                    style={{ width: 64, height: 64 }}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <MaterialIcons name="person" size={28} color="#9CA3AF" />
+                )}
+              </View>
+              <TouchableOpacity
+                onPress={pickPhoto}
+                className="ml-3 px-4 py-3 rounded-2xl bg-gray-900"
+              >
+                <Text className="text-white font-semibold">Choose photo</Text>
+              </TouchableOpacity>
+            </View>
+
             <View className="mt-7">
               <Text className="text-gray-800 font-semibold mb-2">
                 Full name
