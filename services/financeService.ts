@@ -1,18 +1,20 @@
 import type {
-    FinanceCard,
-    FinanceSummary,
-    FinanceTransaction,
-    TransactionType,
+  FinanceCard,
+  FinanceSummary,
+  FinanceTransaction,
+  TransactionType,
 } from "@/types/finance";
 import { getAuth } from "firebase/auth";
 import {
-    addDoc,
-    collection,
-    getDocs,
-    limit,
-    orderBy,
-    query,
-    updateDoc
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -29,6 +31,9 @@ const userCardsCollection = (uid: string) =>
 
 const userTransactionsCollection = (uid: string) =>
   collection(db, "users", uid, "transactions");
+
+const userTransactionDoc = (uid: string, txId: string) =>
+  doc(db, "users", uid, "transactions", txId);
 
 const normalizeLast4 = (last4: string) =>
   String(last4).replace(/\D/g, "").slice(-4);
@@ -124,6 +129,42 @@ export const addFinanceTransaction = async (input: {
     cardId: input.cardId || "",
     createdAt: new Date().toISOString(),
   });
+};
+
+export const updateFinanceTransaction = async (
+  id: string,
+  input: {
+    amount?: number;
+    note?: string;
+    cardId?: string;
+    type?: TransactionType;
+  },
+) => {
+  const uid = requireUserId();
+  const ref = userTransactionDoc(uid, id);
+
+  const updates: Record<string, any> = {};
+
+  if (typeof input.type === "string") updates.type = input.type;
+
+  if (typeof input.amount === "number") {
+    const amount = Number(input.amount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new Error("Amount must be a positive number");
+    }
+    updates.amount = amount;
+  }
+
+  if (typeof input.note === "string") updates.note = input.note.trim();
+  if (typeof input.cardId === "string") updates.cardId = input.cardId;
+
+  await updateDoc(ref, updates);
+};
+
+export const deleteFinanceTransaction = async (id: string) => {
+  const uid = requireUserId();
+  const ref = userTransactionDoc(uid, id);
+  await deleteDoc(ref);
 };
 
 export const listFinanceTransactions = async (

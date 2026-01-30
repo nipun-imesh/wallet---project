@@ -1,15 +1,23 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useLoader } from "@/hooks/useLoader";
 import {
+  deleteFinanceTransaction,
   getFinanceSummary,
   listFinanceTransactions,
+  updateFinanceTransaction,
 } from "@/services/financeService";
 import type { FinanceSummary, FinanceTransaction } from "@/types/finance";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { router, useFocusEffect } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Circle, G, Path } from "react-native-svg";
 
@@ -79,6 +87,28 @@ const Home = () => {
   const [monthSlices, setMonthSlices] = useState<Slice[]>([]);
   const [monthTotalBase, setMonthTotalBase] = useState(0);
   const [recentTx, setRecentTx] = useState<FinanceTransaction[]>([]);
+
+  const [editingTxId, setEditingTxId] = useState<string | null>(null);
+  const [editAmount, setEditAmount] = useState("");
+  const [editCategory, setEditCategory] = useState("Other");
+  const [editNote, setEditNote] = useState("");
+
+  const expenseCategories = [
+    "Food & Drinks",
+    "Transport",
+    "Bills",
+    "Shopping",
+    "Groceries",
+    "Entertainment",
+    "Health",
+    "Education",
+    "Rent",
+    "Travel",
+    "Personal Care",
+    "Gifts & Donations",
+    "EMI / Loans",
+    "Other",
+  ];
 
   const salaryLabel = "Balance";
 
@@ -191,6 +221,79 @@ const Home = () => {
       hideLoader();
     }
   }, [hideLoader, showLoader, user]);
+
+  const beginEditLatest = useCallback((t: FinanceTransaction) => {
+    const parsed = splitNote(t.note);
+    setEditingTxId(t.id);
+    setEditAmount(String(t.amount ?? ""));
+    if (t.type === "expense") {
+      setEditCategory(parsed.category || "Other");
+      setEditNote(parsed.detail || "");
+    } else {
+      setEditCategory("Other");
+      setEditNote(String(t.note || "").trim());
+    }
+  }, []);
+
+  const handleUpdateLatest = useCallback(
+    async (t: FinanceTransaction) => {
+      const amount = Number(editAmount);
+      if (!Number.isFinite(amount) || amount <= 0) {
+        Alert.alert("Record", "Enter a valid amount");
+        return;
+      }
+
+      showLoader();
+      try {
+        const nextNote =
+          t.type === "expense"
+            ? (() => {
+                const c = String(editCategory || "").trim() || "Other";
+                const d = String(editNote || "").trim();
+                return d ? `${c}|${d}` : c;
+              })()
+            : String(editNote || "").trim();
+
+        await updateFinanceTransaction(t.id, {
+          amount,
+          note: nextNote,
+        });
+        setEditingTxId(null);
+        await fetchSummary();
+        Alert.alert("Record", "Updated");
+      } catch (e: any) {
+        Alert.alert("Record", e?.message || "Failed to update");
+      } finally {
+        hideLoader();
+      }
+    },
+    [editAmount, editCategory, editNote, fetchSummary, hideLoader, showLoader],
+  );
+
+  const handleDeleteLatest = useCallback(
+    async (t: FinanceTransaction) => {
+      Alert.alert("Delete record", "Delete this last record?", [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            showLoader();
+            try {
+              await deleteFinanceTransaction(t.id);
+              setEditingTxId(null);
+              await fetchSummary();
+            } catch (e: any) {
+              Alert.alert("Delete", e?.message || "Failed to delete");
+            } finally {
+              hideLoader();
+            }
+          },
+        },
+      ]);
+    },
+    [fetchSummary, hideLoader, showLoader],
+  );
 
   const donut = useMemo(() => {
     const size = 180;
@@ -382,6 +485,7 @@ const Home = () => {
               <View>
                 {recentTx.slice(0, 5).map((t, idx) => {
                   const parsed = splitNote(t.note);
+
                   const title =
                     t.type === "income"
                       ? parsed.category === "Other" &&
@@ -389,14 +493,15 @@ const Home = () => {
                         ? "Salary"
                         : parsed.category
                       : parsed.category;
+
                   const subtitle = parsed.detail
                     ? parsed.detail
                     : formatShortDate(t.createdAt);
+
                   const amountText = `${t.type === "income" ? "+" : "-"}${formatMoney(Math.abs(t.amount))}`;
 
-                  return (
+                  const row = (
                     <View
-                      key={t.id}
                       className={
                         idx === 0
                           ? "flex-row items-center justify-between py-4"
@@ -418,7 +523,10 @@ const Home = () => {
                           >
                             {title}
                           </Text>
-                          <Text className="text-xs text-gray-500 mt-1">
+                          <Text
+                            className="text-xs text-gray-500 mt-1"
+                            numberOfLines={1}
+                          >
                             {subtitle}
                           </Text>
                         </View>
@@ -429,6 +537,8 @@ const Home = () => {
                       </Text>
                     </View>
                   );
+
+                  return <View key={t.id}>{row}</View>;
                 })}
               </View>
             )}
