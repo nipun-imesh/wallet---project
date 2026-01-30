@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useLoader } from "@/hooks/useLoader";
 import {
+  changeUserPassword,
   getUserProfile,
   logoutUser,
   updateUserProfile,
@@ -10,6 +11,8 @@ import {
   ensureBiometricAvailable,
   getBiometricEnabled,
   setBiometricEnabled,
+  suppressNextBiometricPrompt,
+  suppressNextBiometricPromptForUser,
 } from "@/services/biometricService";
 import {
   addFinanceCard,
@@ -18,6 +21,7 @@ import {
   setDefaultFinanceCard,
 } from "@/services/financeService";
 import type { FinanceCard, FinanceSummary } from "@/types/finance";
+import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
@@ -50,6 +54,13 @@ const Profile = () => {
 
   const [profileName, setProfileName] = useState("");
   const [profilePhoto, setProfilePhoto] = useState<string>("");
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const displayName =
     user?.displayName ||
@@ -268,6 +279,9 @@ const Profile = () => {
       return;
     }
 
+    suppressNextBiometricPrompt();
+    if (user?.uid) void suppressNextBiometricPromptForUser(user.uid);
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -291,6 +305,9 @@ const Profile = () => {
       Alert.alert("Photo", "Camera permission is required");
       return;
     }
+
+    suppressNextBiometricPrompt();
+    if (user?.uid) void suppressNextBiometricPromptForUser(user.uid);
 
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
@@ -343,6 +360,55 @@ const Profile = () => {
     }
   }, [hideLoader, isLoading, profileName, profilePhoto, showLoader, user?.uid]);
 
+  const handleChangePassword = useCallback(async () => {
+    if (isLoading) return;
+    if (!user?.uid) {
+      Alert.alert("Password", "Please log in again.");
+      return;
+    }
+
+    const cur = currentPassword;
+    const next = newPassword;
+    const confirm = confirmPassword;
+
+    if (!cur || !next || !confirm) {
+      Alert.alert("Password", "Please fill all password fields");
+      return;
+    }
+    if (next.length < 6) {
+      Alert.alert("Password", "New password must be at least 6 characters");
+      return;
+    }
+    if (next !== confirm) {
+      Alert.alert("Password", "New passwords do not match");
+      return;
+    }
+
+    showLoader();
+    try {
+      await changeUserPassword(cur, next);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setShowCurrentPassword(false);
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
+      Alert.alert("Password", "Password updated");
+    } catch (e: any) {
+      Alert.alert("Password", e?.message || "Failed to update password");
+    } finally {
+      hideLoader();
+    }
+  }, [
+    confirmPassword,
+    currentPassword,
+    hideLoader,
+    isLoading,
+    newPassword,
+    showLoader,
+    user?.uid,
+  ]);
+
   return (
     <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
@@ -369,12 +435,12 @@ const Profile = () => {
               accessibilityRole="button"
               onPress={handlePhotoPress}
               activeOpacity={0.8}
-              className="w-16 h-16 rounded-2xl bg-gray-100 border border-gray-200 overflow-hidden items-center justify-center"
+              className="w-20 h-20 rounded-3xl bg-gray-100 border border-gray-200 overflow-hidden items-center justify-center relative"
             >
               {profilePhoto ? (
                 <Image
                   source={{ uri: profilePhoto }}
-                  style={{ width: 64, height: 64 }}
+                  style={{ width: 80, height: 80 }}
                   resizeMode="cover"
                 />
               ) : (
@@ -385,9 +451,20 @@ const Profile = () => {
                     .toUpperCase()}
                 </Text>
               )}
+
+              <View className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-emerald-700 items-center justify-center border-2 border-white">
+                <MaterialIcons name="photo-camera" size={16} color="#FFFFFF" />
+              </View>
             </TouchableOpacity>
 
-            <Text className="ml-3 text-gray-600">Tap to edit</Text>
+            <View className="flex-1 ml-4">
+              <Text className="text-gray-900 font-semibold">Profile photo</Text>
+              <Text className="text-gray-500 text-xs mt-1">
+                {profilePhoto
+                  ? "Tap to change your photo"
+                  : "Tap to add a photo"}
+              </Text>
+            </View>
           </View>
 
           <Text className="text-xs text-gray-500 mt-4">Name</Text>
@@ -421,6 +498,98 @@ const Profile = () => {
               value={biometricEnabled}
               onValueChange={handleToggleBiometric}
             />
+          </View>
+
+          <View className="mt-5 pt-5 border-t border-gray-200">
+            <Text className="text-gray-900 font-medium">Change password</Text>
+
+            <Text className="text-xs text-gray-500 mt-3">Current password</Text>
+            <View className="mt-2 flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4">
+              <MaterialIcons name="lock" size={20} color="#6B7280" />
+              <TextInput
+                value={currentPassword}
+                onChangeText={setCurrentPassword}
+                placeholder="Current password"
+                placeholderTextColor="#9CA3AF"
+                secureTextEntry={!showCurrentPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+                className="flex-1 py-3 px-3 text-gray-900"
+                textContentType="password"
+              />
+              <TouchableOpacity
+                onPress={() => setShowCurrentPassword((v) => !v)}
+                className="py-2 pl-2"
+              >
+                <MaterialIcons
+                  name={showCurrentPassword ? "visibility" : "visibility-off"}
+                  size={20}
+                  color="#6B7280"
+                />
+              </TouchableOpacity>
+            </View>
+
+            <Text className="text-xs text-gray-500 mt-4">New password</Text>
+            <View className="mt-2 flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4">
+              <MaterialIcons name="lock" size={20} color="#6B7280" />
+              <TextInput
+                value={newPassword}
+                onChangeText={setNewPassword}
+                placeholder="New password"
+                placeholderTextColor="#9CA3AF"
+                secureTextEntry={!showNewPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+                className="flex-1 py-3 px-3 text-gray-900"
+                textContentType="newPassword"
+              />
+              <TouchableOpacity
+                onPress={() => setShowNewPassword((v) => !v)}
+                className="py-2 pl-2"
+              >
+                <MaterialIcons
+                  name={showNewPassword ? "visibility" : "visibility-off"}
+                  size={20}
+                  color="#6B7280"
+                />
+              </TouchableOpacity>
+            </View>
+
+            <Text className="text-xs text-gray-500 mt-4">
+              Confirm new password
+            </Text>
+            <View className="mt-2 flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4">
+              <MaterialIcons name="lock" size={20} color="#6B7280" />
+              <TextInput
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                placeholder="Confirm new password"
+                placeholderTextColor="#9CA3AF"
+                secureTextEntry={!showConfirmPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+                className="flex-1 py-3 px-3 text-gray-900"
+                textContentType="password"
+              />
+              <TouchableOpacity
+                onPress={() => setShowConfirmPassword((v) => !v)}
+                className="py-2 pl-2"
+              >
+                <MaterialIcons
+                  name={showConfirmPassword ? "visibility" : "visibility-off"}
+                  size={20}
+                  color="#6B7280"
+                />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              accessibilityRole="button"
+              onPress={handleChangePassword}
+              className="mt-4 bg-gray-900 rounded-2xl py-3 items-center"
+            >
+              <Text className="text-white font-semibold">Update password</Text>
+            </TouchableOpacity>
           </View>
         </View>
 

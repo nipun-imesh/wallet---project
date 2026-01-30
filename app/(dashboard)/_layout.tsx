@@ -3,6 +3,8 @@ import { logoutUser } from "@/services/authService";
 import {
     confirmBiometric,
     consumeBiometricJustEnabled,
+    consumeSuppressedBiometricPrompt,
+    consumeSuppressedBiometricPromptForUser,
     ensureBiometricAvailable,
     getBiometricEnabled,
 } from "@/services/biometricService";
@@ -52,6 +54,16 @@ const DashboardLayout = () => {
           return;
         }
 
+        // If we just opened ImagePicker (or similar), don't prompt during the return.
+        const suppressed =
+          consumeSuppressedBiometricPrompt() ||
+          (await consumeSuppressedBiometricPromptForUser(user.uid));
+        if (suppressed) {
+          setUnlocked(true);
+          setChecking(false);
+          return;
+        }
+
         // If the user just enabled biometrics in the setup screen, skip an immediate re-prompt.
         const justEnabled = await consumeBiometricJustEnabled(user.uid);
         if (justEnabled) {
@@ -95,6 +107,14 @@ const DashboardLayout = () => {
       if (nextState !== "active") return;
       if (prev === "active") return;
       if (promptInFlight.current) return;
+
+      // ImagePicker temporarily backgrounds the app; don't lock in that case.
+      if (
+        consumeSuppressedBiometricPrompt() ||
+        (await consumeSuppressedBiometricPromptForUser(user.uid))
+      ) {
+        return;
+      }
 
       try {
         const enabled = await getBiometricEnabled(user.uid);

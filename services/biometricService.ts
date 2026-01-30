@@ -1,9 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as LocalAuthentication from "expo-local-authentication";
 
+let suppressNextPromptUntil = 0;
+
 const keyForUser = (uid: string) => `biometricEnabled:${uid}`;
 const promptedKeyForUser = (uid: string) => `biometricPrompted:${uid}`;
 const justEnabledKeyForUser = (uid: string) => `biometricJustEnabled:${uid}`;
+const suppressUntilKeyForUser = (uid: string) =>
+  `biometricSuppressUntil:${uid}`;
 
 export async function getBiometricEnabled(uid: string): Promise<boolean> {
   if (!uid) return false;
@@ -82,4 +86,51 @@ export async function confirmBiometric(reason: string): Promise<boolean> {
   });
 
   return !!result.success;
+}
+
+// Some OS flows (like opening ImagePicker) background the app briefly; if biometrics are enabled
+// and we re-prompt on every resume, it can block those flows. Call this right before launching
+// ImagePicker to skip the next resume prompt.
+export function suppressNextBiometricPrompt(ms: number = 15000): void {
+  const until = Date.now() + ms;
+  suppressNextPromptUntil = Math.max(suppressNextPromptUntil, until);
+}
+
+export function consumeSuppressedBiometricPrompt(): boolean {
+  if (Date.now() < suppressNextPromptUntil) {
+    suppressNextPromptUntil = 0;
+    return true;
+  }
+  return false;
+}
+
+// Persistent suppression for Android flows that may restart the activity during camera/gallery.
+export async function suppressNextBiometricPromptForUser(
+  uid: string,
+  ms: number = 15000,
+): Promise<void> {
+  if (!uid) return;
+  const until = Date.now() + ms;
+  try {
+    await AsyncStorage.setItem(suppressUntilKeyForUser(uid), String(until));
+  } catch {
+    // ignore
+  }
+}
+
+export async function consumeSuppressedBiometricPromptForUser(
+  uid: string,
+): Promise<boolean> {
+  if (!uid) return false;
+  try {
+    const raw = await AsyncStorage.getItem(suppressUntilKeyForUser(uid));
+    const until = Number(raw || 0);
+    if (Number.isFinite(until) && Date.now() < until) {
+      await AsyncStorage.removeItem(suppressUntilKeyForUser(uid));
+      return true;
+    }
+  } catch {
+    // ignore
+  }
+  return false;
 }

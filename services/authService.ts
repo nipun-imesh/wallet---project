@@ -1,11 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
-    createUserWithEmailAndPassword,
-    GoogleAuthProvider,
-    signInWithCredential,
-    signInWithEmailAndPassword,
-    signOut,
-    updateProfile,
+  createUserWithEmailAndPassword,
+  EmailAuthProvider,
+  GoogleAuthProvider,
+  reauthenticateWithCredential,
+  signInWithCredential,
+  signInWithEmailAndPassword,
+  signOut,
+  updatePassword,
+  updateProfile,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
@@ -83,4 +86,63 @@ export const loginWithGoogleIdToken = async (idToken: string) => {
   if (!idToken) throw new Error("Missing Google idToken");
   const credential = GoogleAuthProvider.credential(idToken);
   return await signInWithCredential(auth, credential);
+};
+
+export const changeUserPassword = async (
+  currentPassword: string,
+  newPassword: string,
+) => {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Please log in again.");
+
+  const { email, providerData } = user;
+  if (!email) throw new Error("This account has no email.");
+
+  const providerIds = (providerData || []).map((p) => p.providerId);
+  const canUsePassword =
+    providerIds.includes("password") || providerIds.length === 0;
+  if (!canUsePassword) {
+    throw new Error("Password change isn't available for this login method.");
+  }
+
+  const cur = String(currentPassword || "");
+  const next = String(newPassword || "");
+
+  if (!cur || !next) throw new Error("Please fill all password fields.");
+  if (next.length < 6)
+    throw new Error("New password must be at least 6 characters.");
+  if (cur === next) throw new Error("New password must be different.");
+
+  try {
+    const cred = EmailAuthProvider.credential(email, cur);
+    await reauthenticateWithCredential(user, cred);
+  } catch (e: any) {
+    const code = String(e?.code || "");
+    if (code === "auth/wrong-password") {
+      throw new Error("Current password is incorrect.");
+    }
+    if (code === "auth/too-many-requests") {
+      throw new Error("Too many attempts. Try again later.");
+    }
+    if (code === "auth/user-mismatch" || code === "auth/user-not-found") {
+      throw new Error("Please log in again.");
+    }
+    if (code === "auth/requires-recent-login") {
+      throw new Error("Please log in again and retry.");
+    }
+    throw new Error(e?.message || "Failed to confirm current password.");
+  }
+
+  try {
+    await updatePassword(user, next);
+  } catch (e: any) {
+    const code = String(e?.code || "");
+    if (code === "auth/weak-password") {
+      throw new Error("New password is too weak.");
+    }
+    if (code === "auth/requires-recent-login") {
+      throw new Error("Please log in again and retry.");
+    }
+    throw new Error(e?.message || "Failed to update password.");
+  }
 };

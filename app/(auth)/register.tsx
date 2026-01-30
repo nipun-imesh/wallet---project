@@ -1,5 +1,6 @@
 import { useLoader } from "@/hooks/useLoader";
 import { registerUser } from "@/services/authService";
+import { suppressNextBiometricPrompt } from "@/services/biometricService";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
@@ -44,6 +45,11 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [photoDataUri, setPhotoDataUri] = useState<string>("");
 
+  const avatarInitial = String(name || "U")
+    .trim()
+    .slice(0, 1)
+    .toUpperCase();
+
   const { showLoader, hideLoader, isLoading } = useLoader();
 
   const setFromAsset = (asset: ImagePicker.ImagePickerAsset | undefined) => {
@@ -62,6 +68,8 @@ const Register = () => {
       Alert.alert("Photo", "Media library permission is required");
       return;
     }
+
+    suppressNextBiometricPrompt();
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -87,6 +95,8 @@ const Register = () => {
       Alert.alert("Photo", "Camera permission is required");
       return;
     }
+
+    suppressNextBiometricPrompt();
 
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
@@ -189,20 +199,40 @@ const Register = () => {
               <TouchableOpacity
                 accessibilityRole="button"
                 onPress={handlePhotoPress}
-                className="w-16 h-16 rounded-2xl bg-gray-100 border border-gray-200 overflow-hidden items-center justify-center"
+                className="w-20 h-20 rounded-3xl bg-gray-100 border border-gray-200 overflow-hidden items-center justify-center relative"
                 activeOpacity={0.8}
               >
                 {photoDataUri ? (
                   <Image
                     source={{ uri: photoDataUri }}
-                    style={{ width: 64, height: 64 }}
+                    style={{ width: 80, height: 80 }}
                     resizeMode="cover"
                   />
                 ) : (
-                  <MaterialIcons name="person" size={28} color="#9CA3AF" />
+                  <Text className="text-gray-400 text-3xl font-semibold">
+                    {avatarInitial}
+                  </Text>
                 )}
+
+                <View className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-emerald-700 items-center justify-center border-2 border-white">
+                  <MaterialIcons
+                    name="photo-camera"
+                    size={16}
+                    color="#FFFFFF"
+                  />
+                </View>
               </TouchableOpacity>
-              
+
+              <View className="flex-1 ml-4">
+                <Text className="text-gray-900 font-semibold">
+                  Profile photo
+                </Text>
+                <Text className="text-gray-500 text-xs mt-1">
+                  {photoDataUri
+                    ? "Tap to change your photo"
+                    : "Tap to add a photo (optional)"}
+                </Text>
+              </View>
             </View>
 
             <View className="mt-7">
