@@ -1,8 +1,8 @@
 import { useLoader } from "@/hooks/useLoader";
 import { registerUser } from "@/services/authService";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
@@ -46,6 +46,14 @@ const Register = () => {
 
   const { showLoader, hideLoader, isLoading } = useLoader();
 
+  const setFromAsset = (asset: ImagePicker.ImagePickerAsset | undefined) => {
+    const b64 = asset?.base64;
+    if (!b64) return false;
+    const mime = (asset as any)?.mimeType || "image/jpeg";
+    setPhotoDataUri(`data:${mime};base64,${b64}`);
+    return true;
+  };
+
   const pickPhoto = async () => {
     if (isLoading) return;
 
@@ -64,14 +72,44 @@ const Register = () => {
     });
 
     if (result.canceled) return;
-    const asset = result.assets?.[0];
-    const b64 = asset?.base64;
-    if (!b64) {
+    const ok = setFromAsset(result.assets?.[0]);
+    if (!ok) {
       Alert.alert("Photo", "Failed to read photo");
       return;
     }
-    const mime = asset.mimeType || "image/jpeg";
-    setPhotoDataUri(`data:${mime};base64,${b64}`);
+  };
+
+  const takePhoto = async () => {
+    if (isLoading) return;
+
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert("Photo", "Camera permission is required");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.3,
+      base64: true,
+      cameraType: ImagePicker.CameraType.front,
+    });
+
+    if (result.canceled) return;
+    const ok = setFromAsset(result.assets?.[0]);
+    if (!ok) {
+      Alert.alert("Photo", "Failed to read photo");
+    }
+  };
+
+  const handlePhotoPress = () => {
+    if (isLoading) return;
+    Alert.alert("Photo", "Select a photo source", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Gallery", onPress: pickPhoto },
+      { text: "Camera", onPress: takePhoto },
+    ]);
   };
 
   const handleRegister = async () => {
@@ -98,7 +136,12 @@ const Register = () => {
     }
     showLoader();
     try {
-      await registerUser(cleanName, cleanEmail, password, photoDataUri || undefined);
+      await registerUser(
+        cleanName,
+        cleanEmail,
+        password,
+        photoDataUri || undefined,
+      );
       Alert.alert("Success", "Account created");
       router.replace("/login");
     } catch (e: any) {
@@ -142,9 +185,13 @@ const Register = () => {
           </View>
 
           <View className="p-7">
-            <Text className="text-gray-800 font-semibold mb-2">Photo</Text>
             <View className="flex-row items-center">
-              <View className="w-16 h-16 rounded-2xl bg-gray-100 border border-gray-200 overflow-hidden items-center justify-center">
+              <TouchableOpacity
+                accessibilityRole="button"
+                onPress={handlePhotoPress}
+                className="w-16 h-16 rounded-2xl bg-gray-100 border border-gray-200 overflow-hidden items-center justify-center"
+                activeOpacity={0.8}
+              >
                 {photoDataUri ? (
                   <Image
                     source={{ uri: photoDataUri }}
@@ -154,13 +201,8 @@ const Register = () => {
                 ) : (
                   <MaterialIcons name="person" size={28} color="#9CA3AF" />
                 )}
-              </View>
-              <TouchableOpacity
-                onPress={pickPhoto}
-                className="ml-3 px-4 py-3 rounded-2xl bg-gray-900"
-              >
-                <Text className="text-white font-semibold">Choose photo</Text>
               </TouchableOpacity>
+              
             </View>
 
             <View className="mt-7">

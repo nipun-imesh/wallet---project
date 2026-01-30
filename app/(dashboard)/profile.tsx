@@ -1,6 +1,10 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useLoader } from "@/hooks/useLoader";
-import { getUserProfile, logoutUser, updateUserProfile } from "@/services/authService";
+import {
+  getUserProfile,
+  logoutUser,
+  updateUserProfile,
+} from "@/services/authService";
 import {
   confirmBiometric,
   ensureBiometricAvailable,
@@ -14,8 +18,8 @@ import {
   setDefaultFinanceCard,
 } from "@/services/financeService";
 import type { FinanceCard, FinanceSummary } from "@/types/finance";
-import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   Alert,
@@ -23,9 +27,9 @@ import {
   ScrollView,
   Switch,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
-  TextInput
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -245,6 +249,17 @@ const Profile = () => {
     ]);
   }, [hideLoader, isLoading, showLoader]);
 
+  const setFromAsset = useCallback(
+    (asset: ImagePicker.ImagePickerAsset | undefined) => {
+      const b64 = asset?.base64;
+      if (!b64) return false;
+      const mime = (asset as any)?.mimeType || "image/jpeg";
+      setProfilePhoto(`data:${mime};base64,${b64}`);
+      return true;
+    },
+    [],
+  );
+
   const pickProfilePhoto = useCallback(async () => {
     if (isLoading) return;
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -262,15 +277,44 @@ const Profile = () => {
     });
 
     if (result.canceled) return;
-    const asset = result.assets?.[0];
-    const b64 = asset?.base64;
-    if (!b64) {
+    const ok = setFromAsset(result.assets?.[0]);
+    if (!ok) {
       Alert.alert("Photo", "Failed to read photo");
       return;
     }
-    const mime = asset.mimeType || "image/jpeg";
-    setProfilePhoto(`data:${mime};base64,${b64}`);
-  }, [isLoading]);
+  }, [isLoading, setFromAsset]);
+
+  const takeProfilePhoto = useCallback(async () => {
+    if (isLoading) return;
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert("Photo", "Camera permission is required");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.3,
+      base64: true,
+      cameraType: ImagePicker.CameraType.front,
+    });
+
+    if (result.canceled) return;
+    const ok = setFromAsset(result.assets?.[0]);
+    if (!ok) {
+      Alert.alert("Photo", "Failed to read photo");
+    }
+  }, [isLoading, setFromAsset]);
+
+  const handlePhotoPress = useCallback(() => {
+    if (isLoading) return;
+    Alert.alert("Photo", "Select a photo source", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Gallery", onPress: pickProfilePhoto },
+      { text: "Camera", onPress: takeProfilePhoto },
+    ]);
+  }, [isLoading, pickProfilePhoto, takeProfilePhoto]);
 
   const handleSaveProfile = useCallback(async () => {
     if (!user?.uid) {
@@ -321,7 +365,12 @@ const Profile = () => {
           <Text className="text-lg font-semibold text-gray-900">Profile</Text>
 
           <View className="flex-row items-center mt-4">
-            <View className="w-16 h-16 rounded-2xl bg-gray-100 border border-gray-200 overflow-hidden items-center justify-center">
+            <TouchableOpacity
+              accessibilityRole="button"
+              onPress={handlePhotoPress}
+              activeOpacity={0.8}
+              className="w-16 h-16 rounded-2xl bg-gray-100 border border-gray-200 overflow-hidden items-center justify-center"
+            >
               {profilePhoto ? (
                 <Image
                   source={{ uri: profilePhoto }}
@@ -330,18 +379,15 @@ const Profile = () => {
                 />
               ) : (
                 <Text className="text-gray-400 text-2xl font-semibold">
-                  {String(profileName || displayName || "U").trim().slice(0, 1).toUpperCase()}
+                  {String(profileName || displayName || "U")
+                    .trim()
+                    .slice(0, 1)
+                    .toUpperCase()}
                 </Text>
               )}
-            </View>
-
-            <TouchableOpacity
-              accessibilityRole="button"
-              onPress={pickProfilePhoto}
-              className="ml-3 px-4 py-3 rounded-2xl bg-gray-900"
-            >
-              <Text className="text-white font-semibold">Change photo</Text>
             </TouchableOpacity>
+
+            <Text className="ml-3 text-gray-600">Tap to edit</Text>
           </View>
 
           <Text className="text-xs text-gray-500 mt-4">Name</Text>
