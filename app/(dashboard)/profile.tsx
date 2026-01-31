@@ -549,7 +549,7 @@ const Profile = () => {
               <TextInput
                 value={profileName}
                 onChangeText={setProfileName}
-                className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
+                className="mt-2 bg-app-bg border border-app-border rounded-2xl px-4 py-3 text-gray-900"
                 placeholder="Your name"
                 placeholderTextColor="#9CA3AF"
               />
@@ -557,7 +557,7 @@ const Profile = () => {
               <TouchableOpacity
                 accessibilityRole="button"
                 onPress={handleSaveProfile}
-                className="mt-4 bg-gray-900 rounded-2xl py-3 items-center"
+                className="mt-4 bg-app-primary rounded-2xl py-3 items-center"
               >
                 <Text className="text-white font-semibold">Save changes</Text>
               </TouchableOpacity>
@@ -565,7 +565,7 @@ const Profile = () => {
           ) : null}
         </View>
 
-        <View className="mt-4 bg-white rounded-3xl border border-gray-200 p-5">
+        <View className="mt-4 bg-app-surface rounded-3xl border border-app-border p-5">
           <Text className="text-lg font-semibold text-gray-900">Security</Text>
           <View className="flex-row items-center justify-between mt-4">
             <View className="flex-1 pr-4">
@@ -581,13 +581,13 @@ const Profile = () => {
           </View>
 
           {isEditingProfile ? (
-            <View className="mt-5 pt-5 border-t border-gray-200">
+            <View className="mt-5 pt-5 border-t border-app-border">
               <Text className="text-gray-900 font-medium">Change password</Text>
 
               <Text className="text-xs text-gray-500 mt-3">
                 Current password
               </Text>
-              <View className="mt-2 flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4">
+              <View className="mt-2 flex-row items-center bg-app-bg border border-app-border rounded-2xl px-4">
                 <MaterialIcons name="lock" size={20} color="#6B7280" />
                 <TextInput
                   value={currentPassword}
@@ -613,7 +613,7 @@ const Profile = () => {
               </View>
 
               <Text className="text-xs text-gray-500 mt-4">New password</Text>
-              <View className="mt-2 flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4">
+              <View className="mt-2 flex-row items-center bg-app-bg border border-app-border rounded-2xl px-4">
                 <MaterialIcons name="lock" size={20} color="#6B7280" />
                 <TextInput
                   value={newPassword}
@@ -641,7 +641,7 @@ const Profile = () => {
               <Text className="text-xs text-gray-500 mt-4">
                 Confirm new password
               </Text>
-              <View className="mt-2 flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4">
+              <View className="mt-2 flex-row items-center bg-app-bg border border-app-border rounded-2xl px-4">
                 <MaterialIcons name="lock" size={20} color="#6B7280" />
                 <TextInput
                   value={confirmPassword}
@@ -669,7 +669,7 @@ const Profile = () => {
               <TouchableOpacity
                 accessibilityRole="button"
                 onPress={handleChangePassword}
-                className="mt-4 bg-gray-900 rounded-2xl py-3 items-center"
+                className="mt-4 bg-app-primary rounded-2xl py-3 items-center"
               >
                 <Text className="text-white font-semibold">
                   Update password
@@ -679,7 +679,7 @@ const Profile = () => {
           ) : null}
         </View>
 
-        <View className="mt-4 bg-white rounded-3xl border border-gray-200 p-5">
+        <View className="mt-4 bg-app-surface rounded-3xl border border-app-border p-5">
           <TouchableOpacity
             accessibilityRole="button"
             onPress={handleLogout}

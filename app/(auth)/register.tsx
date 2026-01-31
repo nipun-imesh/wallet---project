@@ -163,7 +163,7 @@ const Register = () => {
 
   return (
     <View
-      className="flex-1 bg-gray-100 px-6 justify-center"
+      className="flex-1 bg-app-bg px-6 justify-center"
       style={{ position: "relative" }}
     >
       <Pressable
@@ -173,7 +173,7 @@ const Register = () => {
 
       <View style={{ zIndex: 1, position: "relative" }}>
         <View className="items-center mb-6">
-          <View className="w-20 h-20 rounded-3xl bg-emerald-700 items-center justify-center">
+          <View className="w-20 h-20 rounded-3xl bg-app-primary items-center justify-center">
             <Image
               source={require("../../assets/images/icon.png")}
               style={{ width: 52, height: 52 }}
@@ -186,8 +186,8 @@ const Register = () => {
           </Text>
         </View>
 
-        <View className="w-full bg-white rounded-3xl overflow-hidden shadow-lg">
-          <View className="bg-emerald-700 px-7 py-5">
+        <View className="w-full bg-app-surface rounded-3xl overflow-hidden shadow-lg">
+          <View className="bg-app-primary px-7 py-5">
             <Text className="text-white text-xl font-semibold">Sign up</Text>
             <Text className="text-white/80 mt-1">
               It takes less than a minute
@@ -214,7 +214,7 @@ const Register = () => {
                   </Text>
                 )}
 
-                <View className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-emerald-700 items-center justify-center border-2 border-white">
+                <View className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-app-primary items-center justify-center border-2 border-white">
                   <MaterialIcons
                     name="photo-camera"
                     size={16}
@@ -330,7 +330,7 @@ const Register = () => {
 
             <Pressable
               className={`mt-7 py-4 rounded-2xl ${
-                isLoading ? "bg-emerald-700/40" : "bg-emerald-700/80"
+                isLoading ? "bg-app-primary/40" : "bg-app-primary/80"
               }`}
               onPress={handleRegister}
             >
@@ -342,7 +342,7 @@ const Register = () => {
             <View className="flex-row justify-center mt-5">
               <Text className="text-gray-600">Already have an account? </Text>
               <TouchableOpacity onPress={() => router.replace("/login")}>
-                <Text className="text-emerald-700 font-semibold">Login</Text>
+                <Text className="text-app-primary font-semibold">Login</Text>
               </TouchableOpacity>
             </View>
           </View>

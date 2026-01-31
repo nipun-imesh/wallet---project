@@ -439,7 +439,7 @@ const News = () => {
                             value={editAmount}
                             onChangeText={setEditAmount}
                             keyboardType="decimal-pad"
-                            className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
+                            className="mt-2 bg-app-bg border border-app-border rounded-2xl px-4 py-3 text-gray-900"
                             placeholder="1000"
                             placeholderTextColor="#9CA3AF"
                           />
@@ -457,8 +457,8 @@ const News = () => {
                                       key={c}
                                       className={`mr-2 mb-2 px-3 py-2 rounded-full border ${
                                         active
-                                          ? "bg-gray-900 border-gray-900"
-                                          : "bg-white border-gray-200"
+                                          ? "bg-app-primary border-app-primary"
+                                          : "bg-app-surface border-app-border"
                                       }`}
                                       onPress={() => setEditCategory(c)}
                                     >
@@ -482,7 +482,7 @@ const News = () => {
                               <TextInput
                                 value={editNote}
                                 onChangeText={setEditNote}
-                                className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
+                                className="mt-2 bg-app-bg border border-app-border rounded-2xl px-4 py-3 text-gray-900"
                                 placeholder="Food, bus, etc"
                                 placeholderTextColor="#9CA3AF"
                               />
@@ -495,7 +495,7 @@ const News = () => {
                               <TextInput
                                 value={editNote}
                                 onChangeText={setEditNote}
-                                className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
+                                className="mt-2 bg-app-bg border border-app-border rounded-2xl px-4 py-3 text-gray-900"
                                 placeholder="January salary"
                                 placeholderTextColor="#9CA3AF"
                               />
@@ -505,7 +505,7 @@ const News = () => {
                           <View className="flex-row mt-4">
                             <TouchableOpacity
                               accessibilityRole="button"
-                              className="flex-1 bg-gray-900 rounded-2xl py-3 items-center"
+                              className="flex-1 bg-app-primary rounded-2xl py-3 items-center"
                               onPress={() => handleUpdateTx(t)}
                             >
                               <Text className="text-white font-semibold">
@@ -514,7 +514,7 @@ const News = () => {
                             </TouchableOpacity>
                             <TouchableOpacity
                               accessibilityRole="button"
-                              className="ml-2 px-4 rounded-2xl border border-gray-200 items-center justify-center"
+                              className="ml-2 px-4 rounded-2xl border border-app-border items-center justify-center"
                               onPress={() => setEditingTxId(null)}
                             >
                               <Text className="text-gray-900 font-semibold">
