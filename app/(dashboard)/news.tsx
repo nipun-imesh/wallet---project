@@ -248,14 +248,14 @@ const News = () => {
   ]);
 
   return (
-    <View className="flex-1 bg-app-bg" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
       <ScrollView
         contentContainerStyle={{
           padding: 16,
           paddingBottom: tabBarHeight + 32,
         }}
       >
-        <View className="bg-app-surface rounded-3xl border border-app-border p-5">
+        <View className="bg-white rounded-3xl border border-gray-200 p-5">
           <Text className="text-lg font-semibold text-gray-900">
             Add record
           </Text>
@@ -266,8 +266,8 @@ const News = () => {
               onPress={() => setEntryType("expense")}
               className={`flex-1 rounded-2xl py-3 items-center border ${
                 entryType === "expense"
-                  ? "bg-app-primary border-app-primary"
-                  : "bg-app-surface border-app-border"
+                  ? "bg-gray-900 border-gray-900"
+                  : "bg-white border-gray-200"
               }`}
             >
               <Text
@@ -286,8 +286,8 @@ const News = () => {
               onPress={() => setEntryType("income")}
               className={`flex-1 ml-2 rounded-2xl py-3 items-center border ${
                 entryType === "income"
-                  ? "bg-app-primary border-app-primary"
-                  : "bg-app-surface border-app-border"
+                  ? "bg-gray-900 border-gray-900"
+                  : "bg-white border-gray-200"
               }`}
             >
               <Text
@@ -313,8 +313,8 @@ const News = () => {
                       key={c}
                       className={`mr-2 mb-2 px-3 py-2 rounded-full border ${
                         active
-                          ? "bg-app-primary border-app-primary"
-                          : "bg-app-surface border-app-border"
+                          ? "bg-gray-900 border-gray-900"
+                          : "bg-white border-gray-200"
                       }`}
                       onPress={() => setTxCategory(c)}
                     >
@@ -333,7 +333,7 @@ const News = () => {
             value={txAmount}
             onChangeText={setTxAmount}
             keyboardType="decimal-pad"
-            className="mt-2 bg-app-bg border border-app-border rounded-2xl px-4 py-3 text-gray-900"
+            className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
             placeholder="1000"
             placeholderTextColor="#9CA3AF"
           />
@@ -342,7 +342,7 @@ const News = () => {
           <TextInput
             value={txNote}
             onChangeText={setTxNote}
-            className="mt-2 bg-app-bg border border-app-border rounded-2xl px-4 py-3 text-gray-900"
+            className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
             placeholder={
               entryType === "expense" ? "Food, bus, etc" : "January salary"
             }
@@ -351,7 +351,7 @@ const News = () => {
 
           <TouchableOpacity
             onPress={handleAddTransaction}
-            className="mt-4 bg-app-primary rounded-2xl py-3 items-center"
+            className="mt-4 bg-gray-900 rounded-2xl py-3 items-center"
           >
             <Text className="text-white font-semibold">
               {isLoading ? "Please wait..." : "Save"}
@@ -359,7 +359,7 @@ const News = () => {
           </TouchableOpacity>
         </View>
 
-        <View className="mt-4 bg-app-surface rounded-3xl border border-app-border overflow-hidden">
+        <View className="mt-4 bg-white rounded-3xl border border-gray-200 overflow-hidden">
           <View className="px-5 pt-5">
             <Text className="text-lg font-semibold text-gray-900">
               Expense / Income history
@@ -439,7 +439,7 @@ const News = () => {
                             value={editAmount}
                             onChangeText={setEditAmount}
                             keyboardType="decimal-pad"
-                            className="mt-2 bg-app-bg border border-app-border rounded-2xl px-4 py-3 text-gray-900"
+                            className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
                             placeholder="1000"
                             placeholderTextColor="#9CA3AF"
                           />
@@ -457,8 +457,8 @@ const News = () => {
                                       key={c}
                                       className={`mr-2 mb-2 px-3 py-2 rounded-full border ${
                                         active
-                                          ? "bg-app-primary border-app-primary"
-                                          : "bg-app-surface border-app-border"
+                                          ? "bg-gray-900 border-gray-900"
+                                          : "bg-white border-gray-200"
                                       }`}
                                       onPress={() => setEditCategory(c)}
                                     >
@@ -482,7 +482,7 @@ const News = () => {
                               <TextInput
                                 value={editNote}
                                 onChangeText={setEditNote}
-                                className="mt-2 bg-app-bg border border-app-border rounded-2xl px-4 py-3 text-gray-900"
+                                className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
                                 placeholder="Food, bus, etc"
                                 placeholderTextColor="#9CA3AF"
                               />
@@ -495,7 +495,7 @@ const News = () => {
                               <TextInput
                                 value={editNote}
                                 onChangeText={setEditNote}
-                                className="mt-2 bg-app-bg border border-app-border rounded-2xl px-4 py-3 text-gray-900"
+                                className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
                                 placeholder="January salary"
                                 placeholderTextColor="#9CA3AF"
                               />
@@ -505,7 +505,7 @@ const News = () => {
                           <View className="flex-row mt-4">
                             <TouchableOpacity
                               accessibilityRole="button"
-                              className="flex-1 bg-app-primary rounded-2xl py-3 items-center"
+                              className="flex-1 bg-gray-900 rounded-2xl py-3 items-center"
                               onPress={() => handleUpdateTx(t)}
                             >
                               <Text className="text-white font-semibold">
@@ -514,7 +514,7 @@ const News = () => {
                             </TouchableOpacity>
                             <TouchableOpacity
                               accessibilityRole="button"
-                              className="ml-2 px-4 rounded-2xl border border-app-border items-center justify-center"
+                              className="ml-2 px-4 rounded-2xl border border-gray-200 items-center justify-center"
                               onPress={() => setEditingTxId(null)}
                             >
                               <Text className="text-gray-900 font-semibold">
