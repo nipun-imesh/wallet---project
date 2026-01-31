@@ -10,6 +10,7 @@ import {
 } from "@/services/biometricService";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
+import { useColorScheme } from "nativewind";
 import React, { useEffect, useRef, useState } from "react";
 import { AppState, Platform, Pressable, Text, View } from "react-native";
 
@@ -23,6 +24,8 @@ const tabs = [
 const DashboardLayout = () => {
   const { user } = useAuth();
   const router = useRouter();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === "dark";
 
   const [checking, setChecking] = useState(true);
   const [unlocked, setUnlocked] = useState(false);
@@ -151,35 +154,39 @@ const DashboardLayout = () => {
   }, [user?.uid]);
 
   if (checking) {
-    return <View className="flex-1 bg-app-bg" />;
+    return <View className="flex-1 bg-app-bg dark:bg-black" />;
   }
 
   if (needsBiometric && !unlocked) {
     return (
-      <View className="flex-1 bg-app-bg items-center justify-center px-8">
-        <Text className="text-lg font-semibold text-gray-900">
+      <View className="flex-1 bg-app-bg dark:bg-black items-center justify-center px-8">
+        <Text className="text-lg font-semibold text-app-text dark:text-white">
           Fingerprint required
         </Text>
-        <Text className="text-gray-500 text-center mt-2">
+        <Text className="text-app-textMuted dark:text-white/70 text-center mt-2">
           Please confirm your fingerprint to continue.
         </Text>
         <Pressable
-          className="mt-6 bg-app-primary rounded-2xl px-6 py-3"
+          className="mt-6 bg-app-primary dark:bg-white rounded-2xl px-6 py-3"
           onPress={async () => {
             const ok = await confirmBiometric("Unlock Wallet");
             if (ok) setUnlocked(true);
           }}
         >
-          <Text className="text-white font-semibold">Try again</Text>
+          <Text className="text-white dark:text-black font-semibold">
+            Try again
+          </Text>
         </Pressable>
         <Pressable
-          className="mt-3 border border-app-border rounded-2xl px-6 py-3"
+          className="mt-3 border border-app-border dark:border-white/15 rounded-2xl px-6 py-3"
           onPress={async () => {
             await logoutUser();
             router.replace("/login");
           }}
         >
-          <Text className="text-gray-900 font-semibold">Logout</Text>
+          <Text className="text-app-text dark:text-white font-semibold">
+            Logout
+          </Text>
         </Pressable>
       </View>
     );
@@ -189,8 +196,8 @@ const DashboardLayout = () => {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#4ade80",
-        tabBarInactiveTintColor: "#9CA3AF",
+        tabBarActiveTintColor: isDark ? "#FFFFFF" : "#111827",
+        tabBarInactiveTintColor: isDark ? "rgba(255,255,255,0.55)" : "#6B7280",
         tabBarLabelStyle: {
           fontSize: 12,
           marginBottom: Platform.OS === "ios" ? 6 : 8,
@@ -204,7 +211,7 @@ const DashboardLayout = () => {
           paddingTop: 10,
           borderTopWidth: 0,
           borderRadius: 26,
-          backgroundColor: "#FFFFFF",
+          backgroundColor: isDark ? "#000000" : "#FFFFFF",
           elevation: 12,
           shadowColor: "#000000",
           shadowOpacity: 0.08,

@@ -163,7 +163,7 @@ const Register = () => {
 
   return (
     <View
-      className="flex-1 bg-app-bg px-6 justify-center"
+      className="flex-1 bg-app-bg dark:bg-black px-6 justify-center"
       style={{ position: "relative" }}
     >
       <Pressable
@@ -180,13 +180,15 @@ const Register = () => {
               resizeMode="contain"
             />
           </View>
-          <Text className="text-3xl font-bold text-app-text mt-4">Wallet</Text>
-          <Text className="text-app-textMuted mt-1">
+          <Text className="text-3xl font-bold text-app-text dark:text-white mt-4">
+            Wallet
+          </Text>
+          <Text className="text-app-textMuted dark:text-white/70 mt-1">
             Create your account to continue
           </Text>
         </View>
 
-        <View className="w-full bg-app-surface rounded-3xl overflow-hidden shadow-lg">
+        <View className="w-full bg-white dark:bg-black rounded-3xl overflow-hidden border border-app-border dark:border-white/15">
           <View className="bg-app-primary px-7 py-5">
             <Text className="text-white text-xl font-semibold">Sign up</Text>
             <Text className="text-white/80 mt-1">
@@ -199,7 +201,7 @@ const Register = () => {
               <TouchableOpacity
                 accessibilityRole="button"
                 onPress={handlePhotoPress}
-                className="w-20 h-20 rounded-3xl bg-app-surface2 border border-app-border overflow-hidden items-center justify-center relative"
+                className="w-20 h-20 rounded-3xl bg-app-surface2 dark:bg-white/10 border border-app-border dark:border-white/15 overflow-hidden items-center justify-center relative"
                 activeOpacity={0.8}
               >
                 {photoDataUri ? (
@@ -224,10 +226,10 @@ const Register = () => {
               </TouchableOpacity>
 
               <View className="flex-1 ml-4">
-                <Text className="text-app-text font-semibold">
+                <Text className="text-app-text dark:text-white font-semibold">
                   Profile photo
                 </Text>
-                <Text className="text-app-textMuted text-xs mt-1">
+                <Text className="text-app-textMuted dark:text-white/70 text-xs mt-1">
                   {photoDataUri
                     ? "Tap to change your photo"
                     : "Tap to add a photo (optional)"}
@@ -236,15 +238,15 @@ const Register = () => {
             </View>
 
             <View className="mt-7">
-              <Text className="text-app-textSecondary font-semibold mb-2">
+              <Text className="text-app-textSecondary dark:text-white/80 font-semibold mb-2">
                 Full name
               </Text>
-              <View className="flex-row items-center bg-app-surface2 border border-app-border rounded-2xl px-4">
+              <View className="flex-row items-center bg-app-surface2 dark:bg-white/10 border border-app-border dark:border-white/15 rounded-2xl px-4">
                 <MaterialIcons name="person" size={22} color="#6B7280" />
                 <TextInput
                   placeholder="Your name"
                   placeholderTextColor="#9CA3AF"
-                  className="flex-1 py-4 px-3 text-app-text"
+                  className="flex-1 py-4 px-3 text-app-text dark:text-white"
                   value={name}
                   onChangeText={setName}
                   autoCapitalize="words"
@@ -253,15 +255,15 @@ const Register = () => {
                 />
               </View>
 
-              <Text className="text-app-textSecondary font-semibold mb-2 mt-4">
+              <Text className="text-app-textSecondary dark:text-white/80 font-semibold mb-2 mt-4">
                 Email
               </Text>
-              <View className="flex-row items-center bg-app-surface2 border border-app-border rounded-2xl px-4">
+              <View className="flex-row items-center bg-app-surface2 dark:bg-white/10 border border-app-border dark:border-white/15 rounded-2xl px-4">
                 <MaterialIcons name="email" size={22} color="#6B7280" />
                 <TextInput
                   placeholder="you@example.com"
                   placeholderTextColor="#9CA3AF"
-                  className="flex-1 py-4 px-3 text-app-text"
+                  className="flex-1 py-4 px-3 text-app-text dark:text-white"
                   value={email}
                   onChangeText={setEmail}
                   autoCapitalize="none"
@@ -271,15 +273,15 @@ const Register = () => {
                 />
               </View>
 
-              <Text className="text-app-textSecondary font-semibold mb-2 mt-4">
+              <Text className="text-app-textSecondary dark:text-white/80 font-semibold mb-2 mt-4">
                 Password
               </Text>
-              <View className="flex-row items-center bg-app-surface2 border border-app-border rounded-2xl px-4">
+              <View className="flex-row items-center bg-app-surface2 dark:bg-white/10 border border-app-border dark:border-white/15 rounded-2xl px-4">
                 <MaterialIcons name="lock" size={22} color="#6B7280" />
                 <TextInput
                   placeholder="At least 6 characters"
                   placeholderTextColor="#9CA3AF"
-                  className="flex-1 py-4 px-3 text-app-text"
+                  className="flex-1 py-4 px-3 text-app-text dark:text-white"
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -299,15 +301,15 @@ const Register = () => {
                 </TouchableOpacity>
               </View>
 
-              <Text className="text-app-textSecondary font-semibold mb-2 mt-4">
+              <Text className="text-app-textSecondary dark:text-white/80 font-semibold mb-2 mt-4">
                 Confirm password
               </Text>
-              <View className="flex-row items-center bg-app-surface2 border border-app-border rounded-2xl px-4">
+              <View className="flex-row items-center bg-app-surface2 dark:bg-white/10 border border-app-border dark:border-white/15 rounded-2xl px-4">
                 <MaterialIcons name="lock" size={22} color="#6B7280" />
                 <TextInput
                   placeholder="Re-enter password"
                   placeholderTextColor="#9CA3AF"
-                  className="flex-1 py-4 px-3 text-app-text"
+                  className="flex-1 py-4 px-3 text-app-text dark:text-white"
                   value={conPassword}
                   onChangeText={setConPassword}
                   secureTextEntry={!showConfirmPassword}
@@ -330,17 +332,21 @@ const Register = () => {
 
             <Pressable
               className={`mt-7 py-4 rounded-2xl ${
-                isLoading ? "bg-app-primary/40" : "bg-app-primary/80"
+                isLoading
+                  ? "bg-app-primary/40 dark:bg-white/30"
+                  : "bg-app-primary dark:bg-white"
               }`}
               onPress={handleRegister}
             >
-              <Text className="text-white text-lg text-center font-semibold">
+              <Text className="text-white dark:text-black text-lg text-center font-semibold">
                 {isLoading ? "Please wait..." : "Register"}
               </Text>
             </Pressable>
 
             <View className="flex-row justify-center mt-5">
-              <Text className="text-gray-600">Already have an account? </Text>
+              <Text className="text-app-textMuted">
+                Already have an account?{" "}
+              </Text>
               <TouchableOpacity onPress={() => router.replace("/login")}>
                 <Text className="text-app-primary font-semibold">Login</Text>
               </TouchableOpacity>

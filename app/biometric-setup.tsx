@@ -134,24 +134,26 @@ const BiometricSetup = () => {
   }, [busy, goHome, user?.uid]);
 
   if (!ready) {
-    return <View className="flex-1 bg-app-bg" />;
+    return <View className="flex-1 bg-app-bg dark:bg-black" />;
   }
 
   return (
     <View
-      className="flex-1 bg-app-bg px-6"
+      className="flex-1 bg-app-bg dark:bg-black px-6"
       style={{ paddingTop: insets.top + 24 }}
     >
-      <View className="bg-app-surface rounded-3xl border border-app-border p-6">
-        <Text className="text-2xl font-semibold text-app-text">
+      <View className="bg-white dark:bg-black rounded-3xl border border-app-border dark:border-white/15 p-6">
+        <Text className="text-2xl font-semibold text-app-text dark:text-white">
           Fingerprint
         </Text>
-        <Text className="text-app-textMuted mt-2">
+        <Text className="text-app-textMuted dark:text-white/70 mt-2">
           Do you want to use fingerprint to unlock the app?
         </Text>
 
         <View className="flex-row items-center justify-between mt-6">
-          <Text className="text-app-text font-medium">Use fingerprint</Text>
+          <Text className="text-app-text dark:text-white font-medium">
+            Use fingerprint
+          </Text>
           <Switch
             value={enabled}
             onValueChange={handleToggle}
@@ -161,22 +163,26 @@ const BiometricSetup = () => {
 
         <Pressable
           className={`mt-6 rounded-2xl py-4 ${
-            busy ? "bg-app-primary/40" : "bg-app-primary"
+            busy
+              ? "bg-app-primary/40 dark:bg-white/30"
+              : "bg-app-primary dark:bg-white"
           }`}
           disabled={busy}
           onPress={handleContinue}
         >
-          <Text className="text-white text-center font-semibold">
+          <Text className="text-white dark:text-black text-center font-semibold">
             {busy ? "Please wait..." : "Continue"}
           </Text>
         </Pressable>
 
         <Pressable
-          className="mt-3 rounded-2xl py-4 border border-app-border bg-app-surface"
+          className="mt-3 rounded-2xl py-4 border border-app-border dark:border-white/15 bg-white dark:bg-black"
           disabled={busy}
           onPress={handleSkip}
         >
-          <Text className="text-app-text text-center font-semibold">Skip</Text>
+          <Text className="text-app-text dark:text-white text-center font-semibold">
+            Skip
+          </Text>
         </Pressable>
       </View>
     </View>

@@ -1,23 +1,23 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useLoader } from "@/hooks/useLoader";
 import {
-    addFinanceTransaction,
-    deleteFinanceTransaction,
-    getFinanceSummary,
-    listFinanceTransactions,
-    updateFinanceTransaction,
+  addFinanceTransaction,
+  deleteFinanceTransaction,
+  getFinanceSummary,
+  listFinanceTransactions,
+  updateFinanceTransaction,
 } from "@/services/financeService";
 import type { FinanceSummary, FinanceTransaction } from "@/types/finance";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
-    Alert,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -248,15 +248,18 @@ const News = () => {
   ]);
 
   return (
-    <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
+    <View
+      className="flex-1 bg-app-bg dark:bg-black"
+      style={{ paddingTop: insets.top }}
+    >
       <ScrollView
         contentContainerStyle={{
           padding: 16,
           paddingBottom: tabBarHeight + 32,
         }}
       >
-        <View className="bg-white rounded-3xl border border-gray-200 p-5">
-          <Text className="text-lg font-semibold text-gray-900">
+        <View className="bg-white dark:bg-black rounded-3xl border border-app-border dark:border-white/15 p-5">
+          <Text className="text-lg font-semibold text-app-text dark:text-white">
             Add record
           </Text>
 
@@ -304,7 +307,9 @@ const News = () => {
 
           {entryType === "expense" ? (
             <>
-              <Text className="text-xs text-gray-500 mt-4">Category</Text>
+              <Text className="text-xs text-app-textMuted dark:text-white/70 mt-4">
+                Category
+              </Text>
               <View className="flex-row flex-wrap mt-2">
                 {categories.map((c) => {
                   const active = txCategory === c;

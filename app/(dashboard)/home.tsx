@@ -8,6 +8,7 @@ import type { FinanceSummary, FinanceTransaction } from "@/types/finance";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { router, useFocusEffect } from "expo-router";
+import { useColorScheme } from "nativewind";
 import React, { useCallback, useMemo, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -63,6 +64,7 @@ const Home = () => {
   const tabBarHeight = useBottomTabBarHeight();
   const { user } = useAuth();
   const { showLoader, hideLoader } = useLoader();
+  const { colorScheme } = useColorScheme();
 
   const [summary, setSummary] = useState<FinanceSummary | null>(null);
   const [monthSlices, setMonthSlices] = useState<Slice[]>([]);
@@ -238,27 +240,27 @@ const Home = () => {
   );
 
   return (
-    <View className="flex-1 bg-app-bg">
+    <View className="flex-1 bg-app-bg dark:bg-black">
       {/* Header */}
-      <View className="bg-app-surface pb-6 rounded-b-[2.5rem] shadow-sm">
+      <View className="bg-white dark:bg-black pb-6 rounded-b-[2.5rem] border-b border-app-border dark:border-white/15">
         <View
           style={{ paddingTop: insets.top + 12 }}
           className="px-6 flex-row justify-between items-center mb-6"
         >
           <View>
-            <Text className="text-app-textMuted text-sm font-medium tracking-wide">
+            <Text className="text-app-textMuted dark:text-white/70 text-sm font-medium tracking-wide">
               Total Balance
             </Text>
-            <Text className="text-4xl font-extrabold text-app-text mt-1 tracking-tight">
+            <Text className="text-4xl font-extrabold text-app-text dark:text-white mt-1 tracking-tight">
               {salaryAmount}
             </Text>
           </View>
 
           <TouchableOpacity
             onPress={() => router.push("/(dashboard)/profile")}
-            className="w-12 h-12 rounded-full border border-app-border items-center justify-center bg-app-surface2"
+            className="w-12 h-12 rounded-full border border-app-border dark:border-white/15 items-center justify-center bg-app-surface2 dark:bg-white/10"
           >
-            <Text className="text-app-primary font-bold text-lg">
+            <Text className="text-app-primary dark:text-white font-bold text-lg">
               {user?.displayName?.[0]?.toUpperCase() || "U"}
             </Text>
           </TouchableOpacity>
@@ -276,10 +278,10 @@ const Home = () => {
                 </G>
               </Svg>
               <View className="absolute inset-0 items-center justify-center">
-                <Text className="text-xs text-app-textMuted font-medium uppercase tracking-wider">
+                <Text className="text-xs text-app-textMuted dark:text-white/70 font-medium uppercase tracking-wider">
                   Spent
                 </Text>
-                <Text className="text-xl font-bold text-app-text mt-0.5">
+                <Text className="text-xl font-bold text-app-text dark:text-white mt-0.5">
                   {formatMoney(monthTotalBase)}
                 </Text>
               </View>
@@ -301,7 +303,7 @@ const Home = () => {
                     />
                     <Text
                       numberOfLines={1}
-                      className="text-app-textSecondary text-sm font-medium"
+                      className="text-app-textSecondary dark:text-white/80 text-sm font-medium"
                     >
                       {slice.label}
                     </Text>
@@ -316,7 +318,7 @@ const Home = () => {
       {/* Recent */}
       <View className="flex-1 mt-6 px-6">
         <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-lg font-bold text-app-text">
+          <Text className="text-lg font-bold text-app-text dark:text-white">
             Recent Transactions
           </Text>
           <TouchableOpacity onPress={() => router.push("/(dashboard)/tasks")}>
@@ -332,8 +334,12 @@ const Home = () => {
         >
           {recentTx.length === 0 ? (
             <View className="items-center justify-center py-10 opacity-60">
-              <MaterialIcons name="receipt-long" size={48} color="#94A3B8" />
-              <Text className="text-app-textMuted mt-3 font-medium">
+              <MaterialIcons
+                name="receipt-long"
+                size={48}
+                color={colorScheme === "dark" ? "#FFFFFF" : "#111827"}
+              />
+              <Text className="text-app-textMuted dark:text-white/70 mt-3 font-medium">
                 No recent activity
               </Text>
             </View>
@@ -346,35 +352,27 @@ const Home = () => {
                 return (
                   <View
                     key={tx.id}
-                    className="flex-row items-center bg-app-surface p-4 rounded-2xl mb-3 shadow-sm border border-app-border"
+                    className="flex-row items-center bg-white dark:bg-black p-4 rounded-2xl mb-3 border border-app-border dark:border-white/15"
                   >
-                    <View
-                      className={`w-12 h-12 rounded-full items-center justify-center ${
-                        isIncome ? "bg-emerald-50" : "bg-rose-50"
-                      }`}
-                    >
+                    <View className="w-12 h-12 rounded-full items-center justify-center bg-app-surface2 dark:bg-white/10 border border-app-border dark:border-white/15">
                       <MaterialIcons
                         name={isIncome ? "arrow-downward" : "arrow-upward"}
                         size={24}
-                        color={isIncome ? "#10B981" : "#EF4444"}
+                        color={colorScheme === "dark" ? "#FFFFFF" : "#111827"}
                       />
                     </View>
 
                     <View className="flex-1 ml-4">
-                      <Text className="text-app-text font-bold text-base">
+                      <Text className="text-app-text dark:text-white font-bold text-base">
                         {category}
                       </Text>
-                      <Text className="text-app-textMuted text-xs mt-0.5">
+                      <Text className="text-app-textMuted dark:text-white/70 text-xs mt-0.5">
                         {formatShortDate(tx.createdAt)}
                         {detail ? ` • ${detail}` : ""}
                       </Text>
                     </View>
 
-                    <Text
-                      className={`font-bold text-base ${
-                        isIncome ? "text-emerald-600" : "text-app-text"
-                      }`}
-                    >
+                    <Text className="font-bold text-base text-app-text dark:text-white">
                       {isIncome ? "+" : "-"}
                       {formatMoney(Math.abs(tx.amount))}
                     </Text>
@@ -386,9 +384,9 @@ const Home = () => {
 
           <TouchableOpacity
             onPress={() => router.push("/(dashboard)/news")}
-            className="mt-2 bg-app-primary rounded-2xl py-4 items-center justify-center"
+            className="mt-2 bg-app-primary dark:bg-white rounded-2xl py-4 items-center justify-center"
           >
-            <Text className="text-white font-semibold text-base">
+            <Text className="text-white dark:text-black font-semibold text-base">
               Add Record
             </Text>
           </TouchableOpacity>

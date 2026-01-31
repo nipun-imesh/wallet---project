@@ -5,6 +5,7 @@ import type { FinanceTransaction } from "@/types/finance";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "expo-router";
+import { useColorScheme } from "nativewind";
 import React, { useCallback, useMemo, useState } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,6 +15,7 @@ const Tasks = () => {
   const { user } = useAuth();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
+  const { colorScheme } = useColorScheme();
 
   const [transactions, setTransactions] = useState<FinanceTransaction[]>([]);
 
@@ -112,15 +114,24 @@ const Tasks = () => {
   }, [transactions]);
 
   return (
-    <View className="flex-1 bg-app-bg" style={{ paddingTop: insets.top }}>
-      <View className="bg-app-surface px-6 py-4 flex-row items-center justify-between border-b border-app-border">
+    <View
+      className="flex-1 bg-app-bg dark:bg-black"
+      style={{ paddingTop: insets.top }}
+    >
+      <View className="bg-white dark:bg-black px-6 py-4 flex-row items-center justify-between border-b border-app-border dark:border-white/15">
         <View>
-          <Text className="text-xs text-gray-500">Compare</Text>
-          <Text className="text-xl font-semibold text-gray-900">
+          <Text className="text-xs text-app-textMuted dark:text-white/70">
+            Compare
+          </Text>
+          <Text className="text-xl font-semibold text-app-text dark:text-white">
             This month vs last month
           </Text>
         </View>
-        <MaterialIcons name="bar-chart" size={22} color="#111827" />
+        <MaterialIcons
+          name="bar-chart"
+          size={22}
+          color={colorScheme === "dark" ? "#FFFFFF" : "#111827"}
+        />
       </View>
 
       <ScrollView
@@ -130,9 +141,11 @@ const Tasks = () => {
           paddingBottom: tabBarHeight + 24,
         }}
       >
-        <View className="bg-app-surface rounded-3xl border border-app-border p-5">
-          <Text className="text-lg font-semibold text-gray-900">Bar chart</Text>
-          <Text className="text-xs text-gray-500 mt-1">
+        <View className="bg-white dark:bg-black rounded-3xl border border-app-border dark:border-white/15 p-5">
+          <Text className="text-lg font-semibold text-app-text dark:text-white">
+            Bar chart
+          </Text>
+          <Text className="text-xs text-app-textMuted dark:text-white/70 mt-1">
             Expenses comparison (last month vs this month)
           </Text>
 
@@ -146,13 +159,13 @@ const Tasks = () => {
                   {formatMoney(monthModel.last.expense)}
                 </Text>
               </View>
-              <View className="mt-2 h-3 rounded-full bg-gray-200 overflow-hidden">
+              <View className="mt-2 h-3 rounded-full bg-gray-200 dark:bg-white/15 overflow-hidden">
                 <View
                   className="h-3 bg-red-500"
                   style={{ width: `${monthModel.last.ratio * 100}%` }}
                 />
               </View>
-              <Text className="text-xs text-gray-500 mt-2">
+              <Text className="text-xs text-app-textMuted dark:text-white/70 mt-2">
                 Income {formatMoney(monthModel.last.income)} • Remaining{" "}
                 {formatMoney(monthModel.last.balance)}
               </Text>
@@ -160,20 +173,20 @@ const Tasks = () => {
 
             <View>
               <View className="flex-row items-center justify-between">
-                <Text className="text-sm font-semibold text-gray-900">
+                <Text className="text-sm font-semibold text-app-text dark:text-white">
                   {monthModel.this.label}
                 </Text>
-                <Text className="text-sm font-semibold text-gray-900">
+                <Text className="text-sm font-semibold text-app-text dark:text-white">
                   {formatMoney(monthModel.this.expense)}
                 </Text>
               </View>
-              <View className="mt-2 h-3 rounded-full bg-gray-200 overflow-hidden">
+              <View className="mt-2 h-3 rounded-full bg-gray-200 dark:bg-white/15 overflow-hidden">
                 <View
                   className="h-3 bg-red-500"
                   style={{ width: `${monthModel.this.ratio * 100}%` }}
                 />
               </View>
-              <Text className="text-xs text-gray-500 mt-2">
+              <Text className="text-xs text-app-textMuted dark:text-white/70 mt-2">
                 Income {formatMoney(monthModel.this.income)} • Remaining{" "}
                 {formatMoney(monthModel.this.balance)}
               </Text>
@@ -181,26 +194,32 @@ const Tasks = () => {
           </View>
         </View>
 
-        <View className="mt-4 bg-app-surface rounded-3xl border border-app-border p-5">
-          <Text className="text-lg font-semibold text-gray-900">Summary</Text>
+        <View className="mt-4 bg-white dark:bg-black rounded-3xl border border-app-border dark:border-white/15 p-5">
+          <Text className="text-lg font-semibold text-app-text dark:text-white">
+            Summary
+          </Text>
 
           <View className="mt-4 flex-row">
-            <View className="flex-1 bg-app-bg border border-app-border rounded-2xl p-4">
-              <Text className="text-xs text-gray-500">Last month</Text>
-              <Text className="text-sm font-semibold text-gray-900 mt-1">
+            <View className="flex-1 bg-app-bg dark:bg-white/10 border border-app-border dark:border-white/15 rounded-2xl p-4">
+              <Text className="text-xs text-app-textMuted dark:text-white/70">
+                Last month
+              </Text>
+              <Text className="text-sm font-semibold text-app-text dark:text-white mt-1">
                 {formatMoney(monthModel.last.balance)}
               </Text>
-              <Text className="text-xs text-gray-500 mt-2">
+              <Text className="text-xs text-app-textMuted dark:text-white/70 mt-2">
                 Expense {formatMoney(monthModel.last.expense)}
               </Text>
             </View>
             <View className="w-3" />
-            <View className="flex-1 bg-app-bg border border-app-border rounded-2xl p-4">
-              <Text className="text-xs text-gray-500">This month</Text>
-              <Text className="text-sm font-semibold text-gray-900 mt-1">
+            <View className="flex-1 bg-app-bg dark:bg-white/10 border border-app-border dark:border-white/15 rounded-2xl p-4">
+              <Text className="text-xs text-app-textMuted dark:text-white/70">
+                This month
+              </Text>
+              <Text className="text-sm font-semibold text-app-text dark:text-white mt-1">
                 {formatMoney(monthModel.this.balance)}
               </Text>
-              <Text className="text-xs text-gray-500 mt-2">
+              <Text className="text-xs text-app-textMuted dark:text-white/70 mt-2">
                 Expense {formatMoney(monthModel.this.expense)}
               </Text>
             </View>
