@@ -152,10 +152,10 @@ const Tasks = () => {
           <View className="mt-5">
             <View className="mb-5">
               <View className="flex-row items-center justify-between">
-                <Text className="text-sm font-semibold text-gray-900">
+                <Text className="text-sm font-semibold text-app-text dark:text-white">
                   {monthModel.last.label}
                 </Text>
-                <Text className="text-sm font-semibold text-gray-900">
+                <Text className="text-sm font-semibold text-app-text dark:text-white">
                   {formatMoney(monthModel.last.expense)}
                 </Text>
               </View>

@@ -60,9 +60,9 @@ const News = () => {
     const safe = Number.isFinite(value) ? value : 0;
     return safe.toLocaleString("en-US", {
       style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      currency: "LKR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     });
   }, []);
 
@@ -193,7 +193,9 @@ const News = () => {
 
   useFocusEffect(
     useCallback(() => {
-      refreshData();
+      if (!user) return;
+      showLoader();
+      Promise.resolve(refreshData()).finally(hideLoader);
     }, [refreshData]),
   );
 
@@ -269,15 +271,15 @@ const News = () => {
               onPress={() => setEntryType("expense")}
               className={`flex-1 rounded-2xl py-3 items-center border ${
                 entryType === "expense"
-                  ? "bg-gray-900 border-gray-900"
-                  : "bg-white border-gray-200"
+                  ? "bg-app-primary dark:bg-white border-app-primary dark:border-white"
+                  : "bg-white dark:bg-black border-app-border dark:border-white/15"
               }`}
             >
               <Text
                 className={
                   entryType === "expense"
-                    ? "text-white font-semibold"
-                    : "text-gray-900 font-semibold"
+                    ? "text-white dark:text-black font-semibold"
+                    : "text-app-text dark:text-white font-semibold"
                 }
               >
                 Expense
@@ -289,18 +291,18 @@ const News = () => {
               onPress={() => setEntryType("income")}
               className={`flex-1 ml-2 rounded-2xl py-3 items-center border ${
                 entryType === "income"
-                  ? "bg-gray-900 border-gray-900"
-                  : "bg-white border-gray-200"
+                  ? "bg-app-primary dark:bg-white border-app-primary dark:border-white"
+                  : "bg-white dark:bg-black border-app-border dark:border-white/15"
               }`}
             >
               <Text
                 className={
                   entryType === "income"
-                    ? "text-white font-semibold"
-                    : "text-gray-900 font-semibold"
+                    ? "text-white dark:text-black font-semibold"
+                    : "text-app-text dark:text-white font-semibold"
                 }
               >
-                Salary
+                Income
               </Text>
             </TouchableOpacity>
           </View>
@@ -318,12 +320,18 @@ const News = () => {
                       key={c}
                       className={`mr-2 mb-2 px-3 py-2 rounded-full border ${
                         active
-                          ? "bg-gray-900 border-gray-900"
-                          : "bg-white border-gray-200"
+                          ? "bg-app-primary dark:bg-white border-app-primary dark:border-white"
+                          : "bg-white dark:bg-black border-app-border dark:border-white/15"
                       }`}
                       onPress={() => setTxCategory(c)}
                     >
-                      <Text className={active ? "text-white" : "text-gray-700"}>
+                      <Text
+                        className={
+                          active
+                            ? "text-white dark:text-black"
+                            : "text-app-textSecondary dark:text-white/80"
+                        }
+                      >
                         {c}
                       </Text>
                     </TouchableOpacity>
@@ -333,21 +341,25 @@ const News = () => {
             </>
           ) : null}
 
-          <Text className="text-xs text-gray-500 mt-4">Amount</Text>
+          <Text className="text-xs text-app-textMuted dark:text-white/70 mt-4">
+            Amount
+          </Text>
           <TextInput
             value={txAmount}
             onChangeText={setTxAmount}
             keyboardType="decimal-pad"
-            className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
+            className="mt-2 bg-app-surface2 dark:bg-white/10 border border-app-border dark:border-white/15 rounded-2xl px-4 py-3 text-app-text dark:text-white"
             placeholder="1000"
             placeholderTextColor="#9CA3AF"
           />
 
-          <Text className="text-xs text-gray-500 mt-3">Note (optional)</Text>
+          <Text className="text-xs text-app-textMuted dark:text-white/70 mt-3">
+            Note (optional)
+          </Text>
           <TextInput
             value={txNote}
             onChangeText={setTxNote}
-            className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
+            className="mt-2 bg-app-surface2 dark:bg-white/10 border border-app-border dark:border-white/15 rounded-2xl px-4 py-3 text-app-text dark:text-white"
             placeholder={
               entryType === "expense" ? "Food, bus, etc" : "January salary"
             }
@@ -356,66 +368,74 @@ const News = () => {
 
           <TouchableOpacity
             onPress={handleAddTransaction}
-            className="mt-4 bg-gray-900 rounded-2xl py-3 items-center"
+            className="mt-4 bg-app-primary dark:bg-white rounded-2xl py-3 items-center"
           >
-            <Text className="text-white font-semibold">
+            <Text className="text-white dark:text-black font-semibold">
               {isLoading ? "Please wait..." : "Save"}
             </Text>
           </TouchableOpacity>
         </View>
 
-        <View className="mt-4 bg-white rounded-3xl border border-gray-200 overflow-hidden">
+        <View className="mt-4 bg-white dark:bg-black rounded-3xl border border-app-border dark:border-white/15 overflow-hidden">
           <View className="px-5 pt-5">
-            <Text className="text-lg font-semibold text-gray-900">
+            <Text className="text-lg font-semibold text-app-text dark:text-white">
               Expense / Income history
             </Text>
-            <Text className="text-xs text-gray-500 tracking-widest mt-2">
+            <Text className="text-xs text-app-textMuted dark:text-white/70 tracking-widest mt-2">
               LAST 31 DAYS
             </Text>
           </View>
 
           <View className="px-5 mt-2">
             {history.length === 0 ? (
-              <Text className="text-gray-500 py-4">No records yet.</Text>
+              <Text className="text-app-textMuted dark:text-white/70 py-4">
+                No records yet.
+              </Text>
             ) : (
               <View>
                 {history.map((t, idx) => {
                   const parsed = splitNote(t.note);
                   const dateText = formatShortDate(t.createdAt);
-                  const subtitle = parsed.detail
-                    ? `${parsed.detail} • ${dateText}`
-                    : dateText;
                   const title =
+                    t.type === "expense" ? parsed.category : "Income";
+                  const subtitle =
                     t.type === "expense"
-                      ? parsed.category
-                      : parsed.category && parsed.category !== "Other"
-                        ? parsed.category
-                        : "Income";
+                      ? parsed.detail
+                        ? `${parsed.detail} • ${dateText}`
+                        : dateText
+                      : (() => {
+                          const note = String(t.note || "").trim();
+                          return note ? `${note} • ${dateText}` : dateText;
+                        })();
                   const amountText = `${t.type === "income" ? "+" : "-"}${formatMoney(Math.abs(t.amount))}`;
+                  const amountClass =
+                    t.type === "income"
+                      ? "text-app-text dark:text-white"
+                      : "text-app-text dark:text-white";
 
                   const row = (
                     <View
                       className={
                         idx === 0
                           ? "flex-row items-center justify-between py-4"
-                          : "flex-row items-center justify-between py-4 border-t border-gray-100"
+                          : "flex-row items-center justify-between py-4 border-t border-app-border dark:border-white/10"
                       }
                     >
                       <View className="flex-1 pr-4">
                         <Text
-                          className="text-gray-900 font-medium"
+                          className="text-app-text dark:text-white font-medium"
                           numberOfLines={1}
                         >
                           {title}
                         </Text>
                         <Text
-                          className="text-xs text-gray-500 mt-1"
+                          className="text-xs text-app-textMuted dark:text-white/70 mt-1"
                           numberOfLines={1}
                         >
                           {subtitle}
                         </Text>
                       </View>
-                      <Text className="text-gray-900 font-semibold">
+                      <Text className={`${amountClass} font-semibold`}>
                         {amountText}
                       </Text>
                     </View>
@@ -438,20 +458,22 @@ const News = () => {
                       </TouchableOpacity>
 
                       {editingTxId === t.id ? (
-                        <View className="pb-4 border-b border-gray-100">
-                          <Text className="text-xs text-gray-500">Amount</Text>
+                        <View className="pb-4 border-b border-app-border dark:border-white/10">
+                          <Text className="text-xs text-app-textMuted dark:text-white/70">
+                            Amount
+                          </Text>
                           <TextInput
                             value={editAmount}
                             onChangeText={setEditAmount}
                             keyboardType="decimal-pad"
-                            className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
+                            className="mt-2 bg-app-surface2 dark:bg-white/10 border border-app-border dark:border-white/15 rounded-2xl px-4 py-3 text-app-text dark:text-white"
                             placeholder="1000"
                             placeholderTextColor="#9CA3AF"
                           />
 
                           {t.type === "expense" ? (
                             <>
-                              <Text className="text-xs text-gray-500 mt-3">
+                              <Text className="text-xs text-app-textMuted dark:text-white/70 mt-3">
                                 Category
                               </Text>
                               <View className="flex-row flex-wrap mt-2">
@@ -462,16 +484,16 @@ const News = () => {
                                       key={c}
                                       className={`mr-2 mb-2 px-3 py-2 rounded-full border ${
                                         active
-                                          ? "bg-gray-900 border-gray-900"
-                                          : "bg-white border-gray-200"
+                                          ? "bg-app-primary dark:bg-white border-app-primary dark:border-white"
+                                          : "bg-white dark:bg-black border-app-border dark:border-white/15"
                                       }`}
                                       onPress={() => setEditCategory(c)}
                                     >
                                       <Text
                                         className={
                                           active
-                                            ? "text-white"
-                                            : "text-gray-700"
+                                            ? "text-white dark:text-black"
+                                            : "text-app-textSecondary dark:text-white/80"
                                         }
                                       >
                                         {c}
@@ -481,26 +503,26 @@ const News = () => {
                                 })}
                               </View>
 
-                              <Text className="text-xs text-gray-500 mt-1">
+                              <Text className="text-xs text-app-textMuted dark:text-white/70 mt-1">
                                 Note (optional)
                               </Text>
                               <TextInput
                                 value={editNote}
                                 onChangeText={setEditNote}
-                                className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
+                                className="mt-2 bg-app-surface2 dark:bg-white/10 border border-app-border dark:border-white/15 rounded-2xl px-4 py-3 text-app-text dark:text-white"
                                 placeholder="Food, bus, etc"
                                 placeholderTextColor="#9CA3AF"
                               />
                             </>
                           ) : (
                             <>
-                              <Text className="text-xs text-gray-500 mt-3">
+                              <Text className="text-xs text-app-textMuted dark:text-white/70 mt-3">
                                 Note (optional)
                               </Text>
                               <TextInput
                                 value={editNote}
                                 onChangeText={setEditNote}
-                                className="mt-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900"
+                                className="mt-2 bg-app-surface2 dark:bg-white/10 border border-app-border dark:border-white/15 rounded-2xl px-4 py-3 text-app-text dark:text-white"
                                 placeholder="January salary"
                                 placeholderTextColor="#9CA3AF"
                               />
@@ -510,28 +532,28 @@ const News = () => {
                           <View className="flex-row mt-4">
                             <TouchableOpacity
                               accessibilityRole="button"
-                              className="flex-1 bg-gray-900 rounded-2xl py-3 items-center"
+                              className="flex-1 bg-app-primary dark:bg-white rounded-2xl py-3 items-center"
                               onPress={() => handleUpdateTx(t)}
                             >
-                              <Text className="text-white font-semibold">
+                              <Text className="text-white dark:text-black font-semibold">
                                 Update
                               </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                               accessibilityRole="button"
-                              className="ml-2 px-4 rounded-2xl border border-gray-200 items-center justify-center"
+                              className="ml-2 px-4 rounded-2xl border border-app-border dark:border-white/15 items-center justify-center"
                               onPress={() => setEditingTxId(null)}
                             >
-                              <Text className="text-gray-900 font-semibold">
+                              <Text className="text-app-text dark:text-white font-semibold">
                                 Cancel
                               </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                               accessibilityRole="button"
-                              className="ml-2 px-4 rounded-2xl bg-red-600 items-center justify-center"
+                              className="ml-2 px-4 rounded-2xl bg-app-primary dark:bg-white items-center justify-center"
                               onPress={() => handleDeleteTx(t)}
                             >
-                              <Text className="text-white font-semibold">
+                              <Text className="text-white dark:text-black font-semibold">
                                 Delete
                               </Text>
                             </TouchableOpacity>

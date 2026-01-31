@@ -322,7 +322,7 @@ const Home = () => {
             Recent Transactions
           </Text>
           <TouchableOpacity onPress={() => router.push("/(dashboard)/tasks")}>
-            <Text className="text-app-primary font-semibold text-sm">
+            <Text className="text-app-primary dark:text-white font-semibold text-sm">
               View All
             </Text>
           </TouchableOpacity>
