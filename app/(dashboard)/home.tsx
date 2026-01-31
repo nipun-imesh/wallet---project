@@ -11,23 +11,12 @@ import { router, useFocusEffect } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Circle, G, Path } from "react-native-svg";
+import Svg, { G, Path } from "react-native-svg";
 
 type Slice = {
   label: string;
   value: number;
   color: string;
-};
-
-const sanitizeCategory = (value: string | undefined) => {
-  const v = String(value || "").trim();
-  if (!v) return "Other";
-  const pipe = v.indexOf("|");
-  if (pipe >= 0) {
-    const left = v.slice(0, pipe).trim();
-    return left ? left : "Other";
-  }
-  return v;
 };
 
 const splitNote = (value: string | undefined) => {
@@ -80,28 +69,19 @@ const Home = () => {
   const [monthTotalBase, setMonthTotalBase] = useState(0);
   const [recentTx, setRecentTx] = useState<FinanceTransaction[]>([]);
 
-  const salaryLabel = "Balance";
-
   const formatMoney = useCallback((value: number) => {
     const safe = Number.isFinite(value) ? value : 0;
     return safe.toLocaleString("en-US", {
       style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      currency: "LKR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     });
   }, []);
 
   const salaryAmount = useMemo(() => {
     return formatMoney(summary?.balance ?? 0);
   }, [formatMoney, summary?.balance]);
-
-  const monthSpentText = useMemo(() => {
-    const spent = monthSlices
-      .filter((s) => s.label !== "Remaining")
-      .reduce((acc, s) => acc + s.value, 0);
-    return formatMoney(spent);
-  }, [formatMoney, monthSlices]);
 
   const formatShortDate = useCallback((value: string | Date) => {
     const d = value instanceof Date ? value : new Date(value);
@@ -133,76 +113,57 @@ const Home = () => {
         const bd = new Date(b.createdAt).getTime();
         return (Number.isNaN(bd) ? 0 : bd) - (Number.isNaN(ad) ? 0 : ad);
       });
-      setRecentTx(sortedRecent);
+      setRecentTx(sortedRecent.slice(0, 7));
 
-      let income = 0;
-      let expense = 0;
       const byCategory = new Map<string, number>();
+      let totalSpent = 0;
       for (const t of monthTx) {
-        if (t.type === "income") {
-          income += t.amount;
-        } else {
-          expense += t.amount;
-          const cat = sanitizeCategory(t.note);
-          byCategory.set(cat, (byCategory.get(cat) || 0) + t.amount);
+        if (t.type === "expense") {
+          totalSpent += t.amount;
+          const { category } = splitNote(t.note);
+          byCategory.set(category, (byCategory.get(category) || 0) + t.amount);
         }
       }
 
-      // Base for the pie: if there is income this month, show how it's allocated (expenses + remaining).
-      // Otherwise, show expense distribution only.
-      const base = income > 0 ? income : expense;
-      setMonthTotalBase(base);
+      setMonthTotalBase(totalSpent);
 
-      if (base <= 0 || byCategory.size === 0) {
+      if (totalSpent <= 0 || byCategory.size === 0) {
         setMonthSlices([]);
         return;
       }
 
-      // Colorful palette (Tailwind-like) for category slices.
-      // Kept as a fixed list so category->color is stable via hashing.
       const palette = [
-        "#2563EB", // blue-600
-        "#0EA5E9", // sky-500
-        "#14B8A6", // teal-500
-        "#22C55E", // green-500
-        "#F59E0B", // amber-500
-        "#F97316", // orange-500
-        "#EF4444", // red-500
-        "#8B5CF6", // violet-500
+        "#4F46E5", // indigo-600
         "#EC4899", // pink-500
         "#10B981", // emerald-500
+        "#F59E0B", // amber-500
+        "#8B5CF6", // violet-500
+        "#EF4444", // red-500
+        "#3B82F6", // blue-500
+        "#14B8A6", // teal-500
+        "#F97316", // orange-500
         "#06B6D4", // cyan-500
-        "#A855F7", // purple-500
       ];
-
-      const pickColor = (label: string) => {
-        let hash = 0;
-        for (let i = 0; i < label.length; i++) {
-          hash = (hash * 31 + label.charCodeAt(i)) | 0;
-        }
-        const idx = Math.abs(hash) % palette.length;
-        return palette[idx];
-      };
 
       const sorted = [...byCategory.entries()]
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 6);
+        .slice(0, 5);
 
-      const slices: Slice[] = sorted.map(([label, value]) => ({
+      const topTotal = sorted.reduce((acc, [, v]) => acc + v, 0);
+      const otherTotal = Math.max(0, totalSpent - topTotal);
+
+      const slices: Slice[] = sorted.map(([label, value], index) => ({
         label,
         value,
-        color: pickColor(label),
+        color: palette[index % palette.length],
       }));
 
-      if (income > 0) {
-        const remaining = Math.max(income - expense, 0);
-        if (remaining > 0) {
-          slices.push({
-            label: "Remaining",
-            value: remaining,
-            color: "#D1D5DB",
-          });
-        }
+      if (otherTotal > 0.01) {
+        slices.push({
+          label: "Other",
+          value: otherTotal,
+          color: "#94A3B8", // slate-400
+        });
       }
 
       setMonthSlices(slices);
@@ -212,60 +173,63 @@ const Home = () => {
   }, [hideLoader, showLoader, user]);
 
   const donut = useMemo(() => {
-    const size = 180;
+    const size = 200;
     const cx = size / 2;
     const cy = size / 2;
-    const rOuter = 80;
-    const rInner = 52;
-    const total = monthTotalBase > 0 ? monthTotalBase : 0;
-    if (!total || monthSlices.length === 0) {
-      const segments = 3;
-      const gap = 0.22;
-      const sweep = (2 * Math.PI) / segments - gap;
-      const paths: Array<{ d: string; color: string }> = [];
-      for (let i = 0; i < segments; i++) {
-        const start = -Math.PI / 2 + i * ((2 * Math.PI) / segments) + gap / 2;
-        const end = start + sweep;
-        paths.push({
-          d: makeDonutPath(cx, cy, rOuter, rInner, start, end),
-          color: "#F3F4F6",
-        });
-      }
-      return { size, cx, cy, rOuter, rInner, paths };
+    const rOuter = 85;
+    const rInner = 65;
+
+    if (monthSlices.length === 0) {
+      return {
+        size,
+        cx,
+        cy,
+        paths: [
+          {
+            d: makeDonutPath(cx, cy, rOuter, rInner, 0, 2 * Math.PI - 0.0001),
+            color: "#E2E8F0", // slate-200
+          },
+        ],
+      };
     }
 
+    const total = monthSlices.reduce((acc, s) => acc + s.value, 0);
     let angle = -Math.PI / 2;
     const paths: Array<{ d: string; color: string }> = [];
-
-    const gap = monthSlices.length > 1 ? 0.04 : 0;
+    const gap = monthSlices.length > 1 ? 0.05 : 0;
 
     for (const s of monthSlices) {
-      const frac = s.value / total;
-      const sweep = Math.max(0, Math.min(2 * Math.PI, frac * 2 * Math.PI));
-      const start = angle + gap / 2;
-      const end = angle + sweep - gap / 2;
-      if (end - start > 0.0001) {
+      const frac = total > 0 ? s.value / total : 0;
+      const sweep = 2 * Math.PI * frac;
+
+      if (monthSlices.length === 1) {
+        paths.push({
+          d: makeDonutPath(
+            cx,
+            cy,
+            rOuter,
+            rInner,
+            -Math.PI / 2,
+            1.5 * Math.PI - 0.0001,
+          ),
+          color: s.color,
+        });
+        break;
+      }
+
+      const start = angle;
+      const end = angle + sweep - gap;
+      if (end > start) {
         paths.push({
           d: makeDonutPath(cx, cy, rOuter, rInner, start, end),
           color: s.color,
         });
       }
-      angle = angle + sweep;
+      angle += sweep;
     }
 
-    return { size, cx, cy, rOuter, rInner, paths };
-  }, [monthSlices, monthTotalBase]);
-
-  const sliceLegend = useMemo(() => {
-    const total = monthTotalBase > 0 ? monthTotalBase : 0;
-    if (!total || monthSlices.length === 0) return [];
-    return monthSlices
-      .filter((s) => s.value > 0)
-      .map((s) => ({
-        ...s,
-        percent: (s.value / total) * 100,
-      }));
-  }, [monthSlices, monthTotalBase]);
+    return { size, cx, cy, paths };
+  }, [monthSlices]);
 
   useFocusEffect(
     useCallback(() => {
@@ -274,244 +238,162 @@ const Home = () => {
   );
 
   return (
-    <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
-      <ScrollView
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingTop: 12,
-          paddingBottom: tabBarHeight + 24,
-        }}
-      >
-        <View className="flex-row items-start justify-between">
-          <View className="pr-3">
-            <Text className="text-2xl font-semibold text-gray-900">Home</Text>
-            <Text className="text-xs text-gray-500 mt-1">
-              Track your balance and spending
+    <View className="flex-1 bg-app-bg">
+      {/* Header */}
+      <View className="bg-white pb-6 rounded-b-[2.5rem] shadow-sm">
+        <View
+          style={{ paddingTop: insets.top + 12 }}
+          className="px-6 flex-row justify-between items-center mb-6"
+        >
+          <View>
+            <Text className="text-app-textMuted text-sm font-medium tracking-wide">
+              Total Balance
+            </Text>
+            <Text className="text-4xl font-extrabold text-app-text mt-1 tracking-tight">
+              {salaryAmount}
             </Text>
           </View>
 
           <TouchableOpacity
-            accessibilityRole="button"
-            className="w-11 h-11 rounded-2xl bg-white items-center justify-center border border-gray-200"
-            onPress={() => {}}
+            onPress={() => router.push("/(dashboard)/profile")}
+            className="w-12 h-12 rounded-full border border-gray-100 items-center justify-center bg-gray-50"
           >
-            <MaterialIcons
-              name="notifications-none"
-              size={24}
-              color="#111827"
-            />
+            <Text className="text-app-primary font-bold text-lg">
+              {user?.displayName?.[0]?.toUpperCase() || "U"}
+            </Text>
           </TouchableOpacity>
         </View>
 
-        <View className="mt-5 bg-emerald-800 rounded-3xl overflow-hidden">
-          <View className="px-5 pt-5 flex-row  items-center justify-between">
-            <Text className="text-white/90 font-semibold  ">{salaryLabel}</Text>
-          </View>
-
-          <View className="px-5 pt-6 flex-row items-center justify-between">
-            <Text className="text-white text-4xl font-semibold pb-5">
-              {salaryAmount}
-            </Text>
-          </View>
-        </View>
-
-        <View className="mt-4 bg-white rounded-3xl border border-gray-200 overflow-hidden">
-          <View className="px-5 pt-5 flex-row items-start justify-between">
-            <View>
-              <Text className="text-lg font-semibold text-gray-900">
-                Expenses structure
-              </Text>
+        {/* Donut + Legend */}
+        <View className="px-6">
+          <View className="flex-row items-center justify-between">
+            <View className="relative items-center justify-center">
+              <Svg width={donut.size} height={donut.size}>
+                <G>
+                  {donut.paths.map((p, i) => (
+                    <Path key={i} d={p.d} fill={p.color} />
+                  ))}
+                </G>
+              </Svg>
+              <View className="absolute inset-0 items-center justify-center">
+                <Text className="text-xs text-app-textMuted font-medium uppercase tracking-wider">
+                  Spent
+                </Text>
+                <Text className="text-xl font-bold text-app-text mt-0.5">
+                  {formatMoney(monthTotalBase)}
+                </Text>
+              </View>
             </View>
 
-            <TouchableOpacity
-              accessibilityRole="button"
-              className="w-10 h-10 rounded-2xl items-center justify-center"
-              onPress={() => {}}
-            >
-              <MaterialIcons name="more-vert" size={22} color="#6B7280" />
-            </TouchableOpacity>
-          </View>
-
-          <View className="px-5 pt-2">
-            <Text className="text-xs text-gray-500 tracking-widest">
-              LAST 30 DAYS
-            </Text>
-            <Text className="text-gray-900 text-3xl font-semibold mt-1">
-              {monthSpentText}
-            </Text>
-          </View>
-
-          <View className="mt-4 items-center px-5 pb-2">
-            <Svg width={donut.size} height={donut.size}>
-              <G>
-                {donut.paths.map((p, idx) => (
-                  <Path key={idx} d={p.d} fill={p.color} />
-                ))}
-                <Circle
-                  cx={donut.cx}
-                  cy={donut.cy}
-                  r={donut.rInner - 8}
-                  fill="#ffffff"
-                />
-              </G>
-            </Svg>
-          </View>
-
-          {sliceLegend.length > 0 ? (
-            <View className="px-5 pb-4">
-              {sliceLegend.map((s, idx) => (
+            <View className="flex-1 ml-6 justify-center">
+              {(monthSlices.length === 0
+                ? [{ label: "No expenses", value: 0, color: "#E2E8F0" }]
+                : monthSlices
+              ).map((slice, i) => (
                 <View
-                  key={s.label}
-                  className={
-                    idx === 0
-                      ? "flex-row items-center justify-between py-2"
-                      : "flex-row items-center justify-between py-2 border-t border-gray-100"
-                  }
+                  key={`${slice.label}-${i}`}
+                  className="flex-row items-center justify-between mb-2"
                 >
-                  <View className="flex-row items-center flex-1 pr-3">
+                  <View className="flex-row items-center flex-1 pr-2">
                     <View
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: s.color }}
+                      className="w-3 h-3 rounded-full mr-2"
+                      style={{ backgroundColor: slice.color }}
                     />
-                    <Text className="text-gray-700 ml-2" numberOfLines={1}>
-                      {s.label}
+                    <Text
+                      numberOfLines={1}
+                      className="text-app-textSecondary text-sm font-medium"
+                    >
+                      {slice.label}
                     </Text>
                   </View>
-                  <Text className="text-gray-900 font-medium">
-                    {Math.round(s.percent)}%
-                  </Text>
                 </View>
               ))}
             </View>
-          ) : null}
-
-          <View className="mt-2 border-t border-gray-100 px-5 py-4">
-            <TouchableOpacity
-              accessibilityRole="button"
-              onPress={() => router.push("/(dashboard)/profile")}
-            >
-              <Text className="text-blue-600 font-medium">Add Record</Text>
-            </TouchableOpacity>
           </View>
         </View>
+      </View>
 
-        <View className="mt-4 bg-white rounded-3xl border border-gray-200 overflow-hidden">
-          <View className="px-5 pt-5 flex-row items-start justify-between">
-            <View>
-              <Text className="text-lg font-semibold text-gray-900">
-                Last records overview
+      {/* Recent */}
+      <View className="flex-1 mt-6 px-6">
+        <View className="flex-row items-center justify-between mb-4">
+          <Text className="text-lg font-bold text-app-text">
+            Recent Transactions
+          </Text>
+          <TouchableOpacity onPress={() => router.push("/(dashboard)/tasks")}>
+            <Text className="text-app-primary font-semibold text-sm">
+              View All
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: tabBarHeight + 20 }}
+        >
+          {recentTx.length === 0 ? (
+            <View className="items-center justify-center py-10 opacity-60">
+              <MaterialIcons name="receipt-long" size={48} color="#94A3B8" />
+              <Text className="text-app-textMuted mt-3 font-medium">
+                No recent activity
               </Text>
             </View>
+          ) : (
+            <View>
+              {recentTx.map((tx) => {
+                const { category, detail } = splitNote(tx.note);
+                const isIncome = tx.type === "income";
 
-            <TouchableOpacity
-              accessibilityRole="button"
-              className="w-10 h-10 rounded-2xl items-center justify-center"
-              onPress={() => {}}
-            >
-              <MaterialIcons name="more-vert" size={22} color="#6B7280" />
-            </TouchableOpacity>
-          </View>
-
-          <View className="px-5 pt-2 pb-2">
-            <Text className="text-xs text-gray-500 tracking-widest">
-              LAST 30 DAYS
-            </Text>
-          </View>
-
-          <View className="px-5">
-            {recentTx.length === 0 ? (
-              <View>
-                {[0, 1].map((i) => (
+                return (
                   <View
-                    key={i}
-                    className={
-                      i === 0
-                        ? "flex-row items-center py-4"
-                        : "flex-row items-center py-4 border-t border-gray-100"
-                    }
+                    key={tx.id}
+                    className="flex-row items-center bg-white p-4 rounded-2xl mb-3 shadow-sm border border-gray-100"
                   >
-                    <View className="w-12 h-12 rounded-full bg-gray-200" />
-                    <View className="flex-1 ml-4">
-                      <View className="h-4 bg-gray-200 rounded w-2/3" />
-                      <View className="h-3 bg-gray-200 rounded w-1/3 mt-2" />
-                    </View>
-                    <View className="h-4 bg-gray-200 rounded w-20" />
-                  </View>
-                ))}
-              </View>
-            ) : (
-              <View>
-                {recentTx.slice(0, 5).map((t, idx) => {
-                  const parsed = splitNote(t.note);
-
-                  const title =
-                    t.type === "income"
-                      ? parsed.category === "Other" &&
-                        !String(t.note || "").trim()
-                        ? "Salary"
-                        : parsed.category
-                      : parsed.category;
-
-                  const subtitle = parsed.detail
-                    ? parsed.detail
-                    : formatShortDate(t.createdAt);
-
-                  const amountText = `${t.type === "income" ? "+" : "-"}${formatMoney(Math.abs(t.amount))}`;
-
-                  const row = (
                     <View
-                      className={
-                        idx === 0
-                          ? "flex-row items-center justify-between py-4"
-                          : "flex-row items-center justify-between py-4 border-t border-gray-100"
-                      }
+                      className={`w-12 h-12 rounded-full items-center justify-center ${
+                        isIncome ? "bg-emerald-50" : "bg-rose-50"
+                      }`}
                     >
-                      <View className="flex-row items-center flex-1 pr-3">
-                        <View className="w-12 h-12 rounded-full bg-gray-100 items-center justify-center">
-                          <MaterialIcons
-                            name={t.type === "income" ? "south" : "north"}
-                            size={22}
-                            color="#6B7280"
-                          />
-                        </View>
-                        <View className="ml-4 flex-1">
-                          <Text
-                            className="text-gray-900 font-medium"
-                            numberOfLines={1}
-                          >
-                            {title}
-                          </Text>
-                          <Text
-                            className="text-xs text-gray-500 mt-1"
-                            numberOfLines={1}
-                          >
-                            {subtitle}
-                          </Text>
-                        </View>
-                      </View>
+                      <MaterialIcons
+                        name={isIncome ? "arrow-downward" : "arrow-upward"}
+                        size={24}
+                        color={isIncome ? "#10B981" : "#EF4444"}
+                      />
+                    </View>
 
-                      <Text className="text-gray-900 font-semibold">
-                        {amountText}
+                    <View className="flex-1 ml-4">
+                      <Text className="text-app-text font-bold text-base">
+                        {category}
+                      </Text>
+                      <Text className="text-app-textMuted text-xs mt-0.5">
+                        {formatShortDate(tx.createdAt)}
+                        {detail ? ` • ${detail}` : ""}
                       </Text>
                     </View>
-                  );
 
-                  return <View key={t.id}>{row}</View>;
-                })}
-              </View>
-            )}
-          </View>
+                    <Text
+                      className={`font-bold text-base ${
+                        isIncome ? "text-emerald-600" : "text-app-text"
+                      }`}
+                    >
+                      {isIncome ? "+" : "-"}
+                      {formatMoney(Math.abs(tx.amount))}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          )}
 
-          <View className="mt-2 border-t border-gray-100 px-5 py-4">
-            <TouchableOpacity
-              accessibilityRole="button"
-              onPress={() => router.push("/(dashboard)/profile")}
-            >
-              <Text className="text-blue-600 font-medium">Add Record</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
+          <TouchableOpacity
+            onPress={() => router.push("/(dashboard)/news")}
+            className="mt-2 bg-app-primary rounded-2xl py-4 items-center justify-center"
+          >
+            <Text className="text-white font-semibold text-base">
+              Add Record
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
     </View>
   );
 };
