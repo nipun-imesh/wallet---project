@@ -143,15 +143,15 @@ const BiometricSetup = () => {
       style={{ paddingTop: insets.top + 24 }}
     >
       <View className="bg-app-surface rounded-3xl border border-app-border p-6">
-        <Text className="text-2xl font-semibold text-gray-900">
+        <Text className="text-2xl font-semibold text-app-text">
           Fingerprint
         </Text>
-        <Text className="text-gray-600 mt-2">
+        <Text className="text-app-textMuted mt-2">
           Do you want to use fingerprint to unlock the app?
         </Text>
 
         <View className="flex-row items-center justify-between mt-6">
-          <Text className="text-gray-900 font-medium">Use fingerprint</Text>
+          <Text className="text-app-text font-medium">Use fingerprint</Text>
           <Switch
             value={enabled}
             onValueChange={handleToggle}
@@ -176,7 +176,7 @@ const BiometricSetup = () => {
           disabled={busy}
           onPress={handleSkip}
         >
-          <Text className="text-gray-900 text-center font-semibold">Skip</Text>
+          <Text className="text-app-text text-center font-semibold">Skip</Text>
         </Pressable>
       </View>
     </View>

@@ -161,8 +161,10 @@ const Login = () => {
               resizeMode="contain"
             />
           </View>
-          <Text className="text-3xl font-bold text-gray-900 mt-4">Wallet</Text>
-          <Text className="text-gray-600 mt-1">Login to manage your money</Text>
+          <Text className="text-3xl font-bold text-app-text mt-4">Wallet</Text>
+          <Text className="text-app-textMuted mt-1">
+            Login to manage your money
+          </Text>
         </View>
 
         <View className="w-full bg-app-surface rounded-3xl overflow-hidden shadow-lg">
@@ -173,13 +175,15 @@ const Login = () => {
 
           <View className="p-7">
             <View className="mt-7">
-              <Text className="text-gray-800 font-semibold mb-2">Email</Text>
-              <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4">
+              <Text className="text-app-textSecondary font-semibold mb-2">
+                Email
+              </Text>
+              <View className="flex-row items-center bg-app-surface2 border border-app-border rounded-2xl px-4">
                 <MaterialIcons name="email" size={22} color="#6B7280" />
                 <TextInput
                   placeholder="you@example.com"
                   placeholderTextColor="#9CA3AF"
-                  className="flex-1 py-4 px-3 text-gray-900"
+                  className="flex-1 py-4 px-3 text-app-text"
                   value={email}
                   onChangeText={setEmail}
                   autoCapitalize="none"
@@ -189,15 +193,15 @@ const Login = () => {
                 />
               </View>
 
-              <Text className="text-gray-800 font-semibold mb-2 mt-4">
+              <Text className="text-app-textSecondary font-semibold mb-2 mt-4">
                 Password
               </Text>
-              <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4">
+              <View className="flex-row items-center bg-app-surface2 border border-app-border rounded-2xl px-4">
                 <MaterialIcons name="lock" size={22} color="#6B7280" />
                 <TextInput
                   placeholder="Your password"
                   placeholderTextColor="#9CA3AF"
-                  className="flex-1 py-4 px-3 text-gray-900"
+                  className="flex-1 py-4 px-3 text-app-text"
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -230,13 +234,13 @@ const Login = () => {
             </Pressable>
 
             <View className="flex-row items-center my-5">
-              <View className="flex-1 h-px bg-gray-200" />
-              <Text className="mx-3 text-gray-500">OR</Text>
-              <View className="flex-1 h-px bg-gray-200" />
+              <View className="flex-1 h-px bg-app-border" />
+              <Text className="mx-3 text-app-textMuted">OR</Text>
+              <View className="flex-1 h-px bg-app-border" />
             </View>
 
             <Pressable
-              className={`py-4 rounded-2xl border border-gray-200 bg-white ${
+              className={`py-4 rounded-2xl border border-app-border bg-app-surface ${
                 isLoading ? "opacity-60" : "opacity-100"
               }`}
               disabled={isLoading}
@@ -253,14 +257,16 @@ const Login = () => {
             >
               <View className="flex-row items-center justify-center">
                 <Ionicons name="logo-google" size={20} color="#111827" />
-                <Text className="text-gray-900 text-lg font-semibold ml-2">
+                <Text className="text-app-text text-lg font-semibold ml-2">
                   Continue with Google
                 </Text>
               </View>
             </Pressable>
 
             <View className="flex-row justify-center mt-5">
-              <Text className="text-gray-600">Don’t have an account? </Text>
+              <Text className="text-app-textMuted">
+                Don’t have an account?{" "}
+              </Text>
               <TouchableOpacity onPress={() => router.push("/register")}>
                 <Text className="text-app-primary font-semibold">Register</Text>
               </TouchableOpacity>

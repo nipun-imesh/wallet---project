@@ -240,7 +240,7 @@ const Home = () => {
   return (
     <View className="flex-1 bg-app-bg">
       {/* Header */}
-      <View className="bg-white pb-6 rounded-b-[2.5rem] shadow-sm">
+      <View className="bg-app-surface pb-6 rounded-b-[2.5rem] shadow-sm">
         <View
           style={{ paddingTop: insets.top + 12 }}
           className="px-6 flex-row justify-between items-center mb-6"
@@ -256,7 +256,7 @@ const Home = () => {
 
           <TouchableOpacity
             onPress={() => router.push("/(dashboard)/profile")}
-            className="w-12 h-12 rounded-full border border-gray-100 items-center justify-center bg-gray-50"
+            className="w-12 h-12 rounded-full border border-app-border items-center justify-center bg-app-surface2"
           >
             <Text className="text-app-primary font-bold text-lg">
               {user?.displayName?.[0]?.toUpperCase() || "U"}
@@ -346,7 +346,7 @@ const Home = () => {
                 return (
                   <View
                     key={tx.id}
-                    className="flex-row items-center bg-white p-4 rounded-2xl mb-3 shadow-sm border border-gray-100"
+                    className="flex-row items-center bg-app-surface p-4 rounded-2xl mb-3 shadow-sm border border-app-border"
                   >
                     <View
                       className={`w-12 h-12 rounded-full items-center justify-center ${
