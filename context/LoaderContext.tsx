@@ -1,36 +1,54 @@
 // context/LoaderContext.tsx
-import React, { createContext, useState, ReactNode } from "react"
-import { View, ActivityIndicator } from "react-native"
+import React, { createContext, ReactNode, useState } from "react";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 interface LoaderContextProps {
-  showLoader: () => void
-  hideLoader: () => void
-  isLoading: boolean
+  showLoader: () => void;
+  hideLoader: () => void;
+  isLoading: boolean;
 }
 
 export const LoaderContext = createContext<LoaderContextProps>({
   showLoader: () => {},
   hideLoader: () => {},
-  isLoading: false
-})
+  isLoading: false,
+});
 
 export const LoaderProvider = ({ children }: { children: ReactNode }) => {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
-  const showLoader = () => setIsLoading(true)
-  const hideLoader = () => setIsLoading(false)
+  const showLoader = () => setIsLoading(true);
+  const hideLoader = () => setIsLoading(false);
 
   return (
     <LoaderContext.Provider value={{ showLoader, hideLoader, isLoading }}>
-      {children}
+      <View className="flex-1" style={styles.container}>
+        {children}
 
-      {isLoading && (
-        <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center bg-black/30">
-          <View className="bg-white p-6 rounded-2xl shadow-lg">
-            <ActivityIndicator size="large" color="#1e40af" />
+        {isLoading && (
+          <View
+            pointerEvents="auto"
+            className="justify-center items-center bg-black/30"
+            style={styles.overlay}
+          >
+            <View className="bg-white p-6 rounded-2xl shadow-lg">
+              <ActivityIndicator size="large" color="#4ade80" />
+            </View>
           </View>
-        </View>
-      )}
+        )}
+      </View>
     </LoaderContext.Provider>
-  )
-}
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    position: "relative",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 9999,
+    elevation: 9999,
+  },
+});

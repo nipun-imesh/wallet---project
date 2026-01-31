@@ -112,8 +112,8 @@ const Tasks = () => {
   }, [transactions]);
 
   return (
-    <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
-      <View className="bg-white px-6 py-4 flex-row items-center justify-between border-b border-gray-200">
+    <View className="flex-1 bg-app-bg" style={{ paddingTop: insets.top }}>
+      <View className="bg-app-surface px-6 py-4 flex-row items-center justify-between border-b border-app-border">
         <View>
           <Text className="text-xs text-gray-500">Compare</Text>
           <Text className="text-xl font-semibold text-gray-900">
@@ -130,7 +130,7 @@ const Tasks = () => {
           paddingBottom: tabBarHeight + 24,
         }}
       >
-        <View className="bg-white rounded-3xl border border-gray-200 p-5">
+        <View className="bg-app-surface rounded-3xl border border-app-border p-5">
           <Text className="text-lg font-semibold text-gray-900">Bar chart</Text>
           <Text className="text-xs text-gray-500 mt-1">
             Expenses comparison (last month vs this month)
@@ -181,11 +181,11 @@ const Tasks = () => {
           </View>
         </View>
 
-        <View className="mt-4 bg-white rounded-3xl border border-gray-200 p-5">
+        <View className="mt-4 bg-app-surface rounded-3xl border border-app-border p-5">
           <Text className="text-lg font-semibold text-gray-900">Summary</Text>
 
           <View className="mt-4 flex-row">
-            <View className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl p-4">
+            <View className="flex-1 bg-app-bg border border-app-border rounded-2xl p-4">
               <Text className="text-xs text-gray-500">Last month</Text>
               <Text className="text-sm font-semibold text-gray-900 mt-1">
                 {formatMoney(monthModel.last.balance)}
@@ -195,7 +195,7 @@ const Tasks = () => {
               </Text>
             </View>
             <View className="w-3" />
-            <View className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl p-4">
+            <View className="flex-1 bg-app-bg border border-app-border rounded-2xl p-4">
               <Text className="text-xs text-gray-500">This month</Text>
               <Text className="text-sm font-semibold text-gray-900 mt-1">
                 {formatMoney(monthModel.this.balance)}

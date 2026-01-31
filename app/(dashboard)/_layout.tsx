@@ -151,12 +151,12 @@ const DashboardLayout = () => {
   }, [user?.uid]);
 
   if (checking) {
-    return <View className="flex-1 bg-white" />;
+    return <View className="flex-1 bg-app-bg" />;
   }
 
   if (needsBiometric && !unlocked) {
     return (
-      <View className="flex-1 bg-white items-center justify-center px-8">
+      <View className="flex-1 bg-app-bg items-center justify-center px-8">
         <Text className="text-lg font-semibold text-gray-900">
           Fingerprint required
         </Text>
@@ -164,7 +164,7 @@ const DashboardLayout = () => {
           Please confirm your fingerprint to continue.
         </Text>
         <Pressable
-          className="mt-6 bg-gray-900 rounded-2xl px-6 py-3"
+          className="mt-6 bg-app-primary rounded-2xl px-6 py-3"
           onPress={async () => {
             const ok = await confirmBiometric("Unlock Wallet");
             if (ok) setUnlocked(true);
@@ -173,7 +173,7 @@ const DashboardLayout = () => {
           <Text className="text-white font-semibold">Try again</Text>
         </Pressable>
         <Pressable
-          className="mt-3 border border-gray-200 rounded-2xl px-6 py-3"
+          className="mt-3 border border-app-border rounded-2xl px-6 py-3"
           onPress={async () => {
             await logoutUser();
             router.replace("/login");

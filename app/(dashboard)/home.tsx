@@ -274,7 +274,7 @@ const Home = () => {
   );
 
   return (
-    <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-app-bg" style={{ paddingTop: insets.top }}>
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 16,
@@ -303,7 +303,7 @@ const Home = () => {
           </TouchableOpacity>
         </View>
 
-        <View className="mt-5 bg-emerald-800 rounded-3xl overflow-hidden">
+        <View className="mt-5 bg-app-primaryDark rounded-3xl overflow-hidden">
           <View className="px-5 pt-5 flex-row  items-center justify-between">
             <Text className="text-white/90 font-semibold  ">{salaryLabel}</Text>
           </View>
@@ -390,7 +390,7 @@ const Home = () => {
               accessibilityRole="button"
               onPress={() => router.push("/(dashboard)/profile")}
             >
-              <Text className="text-blue-600 font-medium">Add Record</Text>
+              <Text className="text-app-primary font-medium">Add Record</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -507,7 +507,7 @@ const Home = () => {
               accessibilityRole="button"
               onPress={() => router.push("/(dashboard)/profile")}
             >
-              <Text className="text-blue-600 font-medium">Add Record</Text>
+              <Text className="text-app-primary font-medium">Add Record</Text>
             </TouchableOpacity>
           </View>
         </View>

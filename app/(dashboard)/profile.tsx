@@ -1,24 +1,24 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useLoader } from "@/hooks/useLoader";
 import {
-  changeUserPassword,
-  getUserProfile,
-  logoutUser,
-  updateUserProfile,
+    changeUserPassword,
+    getUserProfile,
+    logoutUser,
+    updateUserProfile,
 } from "@/services/authService";
 import {
-  confirmBiometric,
-  ensureBiometricAvailable,
-  getBiometricEnabled,
-  setBiometricEnabled,
-  suppressNextBiometricPrompt,
-  suppressNextBiometricPromptForUser,
+    confirmBiometric,
+    ensureBiometricAvailable,
+    getBiometricEnabled,
+    setBiometricEnabled,
+    suppressNextBiometricPrompt,
+    suppressNextBiometricPromptForUser,
 } from "@/services/biometricService";
 import {
-  addFinanceCard,
-  getFinanceSummary,
-  listFinanceCards,
-  setDefaultFinanceCard,
+    addFinanceCard,
+    getFinanceSummary,
+    listFinanceCards,
+    setDefaultFinanceCard,
 } from "@/services/financeService";
 import type { FinanceCard, FinanceSummary } from "@/types/finance";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -26,14 +26,14 @@ import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
-  Alert,
-  Image,
-  ScrollView,
-  Switch,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Image,
+    ScrollView,
+    Switch,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -459,9 +459,9 @@ const Profile = () => {
   ]);
 
   return (
-    <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-app-bg" style={{ paddingTop: insets.top }}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
-        <View className="bg-white rounded-3xl border border-gray-200 p-5">
+        <View className="bg-app-surface rounded-3xl border border-app-border p-5">
           <Text className="text-xs text-gray-500">Logged in as</Text>
           <Text className="text-lg font-semibold text-gray-900 mt-1">
             {displayName}
@@ -471,7 +471,7 @@ const Profile = () => {
           </Text>
         </View>
 
-        <View className="mt-4 bg-white rounded-3xl border border-gray-200 p-5">
+        <View className="mt-4 bg-app-surface rounded-3xl border border-app-border p-5">
           <View className="flex-row items-center justify-between">
             <Text className="text-lg font-semibold text-gray-900">Profile</Text>
 
@@ -479,7 +479,7 @@ const Profile = () => {
               <TouchableOpacity
                 accessibilityRole="button"
                 onPress={handleCancelEdit}
-                className="px-4 py-2 rounded-2xl border border-gray-200"
+                className="px-4 py-2 rounded-2xl border border-app-border"
               >
                 <Text className="text-gray-900 font-semibold">Cancel</Text>
               </TouchableOpacity>
@@ -487,7 +487,7 @@ const Profile = () => {
               <TouchableOpacity
                 accessibilityRole="button"
                 onPress={handleStartEdit}
-                className="px-4 py-2 rounded-2xl bg-gray-900"
+                className="px-4 py-2 rounded-2xl bg-app-primary"
               >
                 <Text className="text-white font-semibold">Edit profile</Text>
               </TouchableOpacity>
@@ -500,7 +500,7 @@ const Profile = () => {
               onPress={handlePhotoPress}
               disabled={!isEditingProfile}
               activeOpacity={0.8}
-              className="w-20 h-20 rounded-3xl bg-gray-100 border border-gray-200 overflow-hidden items-center justify-center relative"
+              className="w-20 h-20 rounded-3xl bg-app-bg border border-app-border overflow-hidden items-center justify-center relative"
             >
               {profilePhoto ? (
                 <Image
@@ -517,7 +517,7 @@ const Profile = () => {
                 </Text>
               )}
 
-              <View className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-emerald-700 items-center justify-center border-2 border-white">
+              <View className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-app-primary items-center justify-center border-2 border-white">
                 <MaterialIcons name="photo-camera" size={16} color="#FFFFFF" />
               </View>
             </TouchableOpacity>

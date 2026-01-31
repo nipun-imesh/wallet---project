@@ -5,13 +5,13 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const TaskForm = () => {
@@ -103,7 +103,10 @@ const TaskForm = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 24 }}>
+    <ScrollView
+      className="bg-app-bg"
+      contentContainerStyle={{ flexGrow: 1, padding: 24 }}
+    >
       <TouchableOpacity
         className="flex-row items-center mb-6"
         onPress={() => router.back()}
@@ -112,7 +115,7 @@ const TaskForm = () => {
         <Text className="text-gray-800 font-medium ml-1">Back</Text>
       </TouchableOpacity>
 
-      <View className="p-6 rounded-2xl bg-white border border-gray-300 shadow-md">
+      <View className="p-6 rounded-2xl bg-app-surface border border-app-border shadow-md">
         <Text className="text-gray-800 text-lg font-semibold mb-2">
           Task Title
         </Text>
@@ -121,7 +124,7 @@ const TaskForm = () => {
           placeholderTextColor="#999"
           value={title}
           onChangeText={setTitle}
-          className="mb-5 p-4 rounded-xl bg-gray-100 text-gray-800 border border-gray-300 text-base font-medium"
+          className="mb-5 p-4 rounded-xl bg-app-bg text-gray-800 border border-app-border text-base font-medium"
         />
 
         <Text className="text-gray-800 text-lg font-semibold mb-2">
@@ -133,7 +136,7 @@ const TaskForm = () => {
           value={description}
           onChangeText={setDescription}
           multiline
-          className="mb-6 p-4 rounded-xl bg-gray-100 text-gray-800 border border-gray-300 text-base font-medium h-32"
+          className="mb-6 p-4 rounded-xl bg-app-bg text-gray-800 border border-app-border text-base font-medium h-32"
         />
 
         <Text className="text-gray-800 text-lg font-semibold mb-2">
@@ -145,7 +148,7 @@ const TaskForm = () => {
           value={amount}
           onChangeText={setAmount}
           keyboardType="decimal-pad"
-          className="mb-5 p-4 rounded-xl bg-gray-100 text-gray-800 border border-gray-300 text-base font-medium"
+          className="mb-5 p-4 rounded-xl bg-app-bg text-gray-800 border border-app-border text-base font-medium"
         />
 
         <Text className="text-gray-800 text-lg font-semibold mb-2">
@@ -160,8 +163,8 @@ const TaskForm = () => {
                 key={c}
                 className={`mr-2 mb-2 px-4 py-2 rounded-full border ${
                   active
-                    ? "bg-gray-900 border-gray-900"
-                    : "bg-white border-gray-300"
+                    ? "bg-app-primary border-app-primary"
+                    : "bg-app-surface border-app-border"
                 }`}
                 onPress={() => setCategory(c)}
               >
@@ -178,13 +181,11 @@ const TaskForm = () => {
           placeholderTextColor="#999"
           value={category}
           onChangeText={setCategory}
-          className="mb-6 p-4 rounded-xl bg-gray-100 text-gray-800 border border-gray-300 text-base font-medium"
+          className="mb-6 p-4 rounded-xl bg-app-bg text-gray-800 border border-app-border text-base font-medium"
         />
 
         <Pressable
-          className={`px-6 py-3 rounded-2xl ${
-            taskId ? "bg-blue-600/80" : "bg-green-600/80"
-          }`}
+          className="px-6 py-3 rounded-2xl bg-app-primary/80"
           onPress={handleSubmit}
         >
           <Text className="text-white text-lg text-center">

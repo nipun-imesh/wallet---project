@@ -134,15 +134,15 @@ const BiometricSetup = () => {
   }, [busy, goHome, user?.uid]);
 
   if (!ready) {
-    return <View className="flex-1 bg-white" />;
+    return <View className="flex-1 bg-app-bg" />;
   }
 
   return (
     <View
-      className="flex-1 bg-gray-50 px-6"
+      className="flex-1 bg-app-bg px-6"
       style={{ paddingTop: insets.top + 24 }}
     >
-      <View className="bg-white rounded-3xl border border-gray-200 p-6">
+      <View className="bg-app-surface rounded-3xl border border-app-border p-6">
         <Text className="text-2xl font-semibold text-gray-900">
           Fingerprint
         </Text>
@@ -161,7 +161,7 @@ const BiometricSetup = () => {
 
         <Pressable
           className={`mt-6 rounded-2xl py-4 ${
-            busy ? "bg-gray-900/40" : "bg-gray-900"
+            busy ? "bg-app-primary/40" : "bg-app-primary"
           }`}
           disabled={busy}
           onPress={handleContinue}
@@ -172,7 +172,7 @@ const BiometricSetup = () => {
         </Pressable>
 
         <Pressable
-          className="mt-3 rounded-2xl py-4 border border-gray-200 bg-white"
+          className="mt-3 rounded-2xl py-4 border border-app-border bg-app-surface"
           disabled={busy}
           onPress={handleSkip}
         >
