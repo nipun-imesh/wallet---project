@@ -11,11 +11,11 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { AppState, Pressable, Text, View } from "react-native";
+import { AppState, Platform, Pressable, Text, View } from "react-native";
 
 const tabs = [
   { name: "home", icon: "home", title: "Home" },
-  { name: "news", icon: "article", title: "News" },
+  { name: "news", icon: "article", title: "Activity" },
   { name: "profile", icon: "person", title: "Profile" },
   { name: "tasks", icon: "assignment", title: "Tasks" },
 ] as const;
@@ -189,6 +189,28 @@ const DashboardLayout = () => {
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarActiveTintColor: "#4ade80",
+        tabBarInactiveTintColor: "#9CA3AF",
+        tabBarLabelStyle: {
+          fontSize: 12,
+          marginBottom: Platform.OS === "ios" ? 6 : 8,
+        },
+        tabBarStyle: {
+          position: "absolute",
+          left: 16,
+          right: 16,
+          bottom: Platform.OS === "ios" ? 14 : 12,
+          height: Platform.OS === "ios" ? 72 : 68,
+          paddingTop: 10,
+          borderTopWidth: 0,
+          borderRadius: 26,
+          backgroundColor: "#FFFFFF",
+          elevation: 12,
+          shadowColor: "#000000",
+          shadowOpacity: 0.08,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: 6 },
+        },
       }}
       // tabBar={(props) => <></>}
     >
@@ -196,6 +218,8 @@ const DashboardLayout = () => {
         <Tabs.Screen
           name={tab.name}
           options={{
+            title: tab.title,
+            tabBarLabel: tab.title,
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name={tab.icon} color={color} size={size} />
             ),
