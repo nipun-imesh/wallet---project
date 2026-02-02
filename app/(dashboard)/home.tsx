@@ -240,36 +240,36 @@ const Home = () => {
   );
 
   return (
-    <View className="flex-1 bg-app-bg dark:bg-black">
+    <View className="flex-1 bg-app-bg dark:bg-appDark-bg">
       {/* Header */}
-      <View className="bg-white dark:bg-black pb-6 rounded-b-[2.5rem] border-b border-app-border dark:border-white/15">
+      <View className="bg-app-surface dark:bg-appDark-surface pb-6 rounded-b-[2.5rem] border-b border-app-border dark:border-appDark-border">
         <View
           style={{ paddingTop: insets.top + 12 }}
           className="px-6 flex-row justify-between items-center mb-6"
         >
           <View>
-            <Text className="text-app-textMuted dark:text-white/70 text-sm font-medium tracking-wide">
+            <Text className="text-app-textMuted dark:text-appDark-textMuted text-sm font-medium tracking-wide">
               Total Balance
             </Text>
-            <Text className="text-4xl font-extrabold text-app-text dark:text-white mt-1 tracking-tight">
+            <Text className="text-4xl font-extrabold text-app-text dark:text-appDark-text mt-1 tracking-tight">
               {salaryAmount}
             </Text>
           </View>
 
           <TouchableOpacity
             onPress={() => router.push("/(dashboard)/settings/profile")}
-            className="w-12 h-12 rounded-full border border-app-border dark:border-white/15 items-center justify-center bg-app-surface2 dark:bg-white/10"
+            className="w-12 h-12 rounded-full border border-app-border dark:border-appDark-border items-center justify-center bg-app-surface2 dark:bg-appDark-surface2"
           >
-            <Text className="text-app-primary dark:text-white font-bold text-lg">
+            <Text className="text-app-primary dark:text-appDark-primary font-bold text-lg">
               {user?.displayName?.[0]?.toUpperCase() || "U"}
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Donut + Legend */}
         <View className="px-6">
-          <View className="flex-row items-center justify-between">
-            <View className="relative items-center justify-center">
+          <View className="bg-app-surface2 dark:bg-appDark-surface2 border border-app-border dark:border-appDark-border rounded-3xl p-5">
+            <View className="flex-row items-center justify-between">
+              <View className="relative items-center justify-center">
               <Svg width={donut.size} height={donut.size}>
                 <G>
                   {donut.paths.map((p, i) => (
@@ -278,44 +278,45 @@ const Home = () => {
                 </G>
               </Svg>
               <View className="absolute inset-0 items-center justify-center">
-                <Text className="text-xs text-app-textMuted dark:text-white/70 font-medium uppercase tracking-wider">
+                <Text className="text-xs text-app-textMuted dark:text-appDark-textMuted font-medium uppercase tracking-wider">
                   Spent
                 </Text>
-                <Text className="text-xl font-bold text-app-text dark:text-white mt-0.5">
+                <Text className="text-xl font-bold text-app-text dark:text-appDark-text mt-0.5">
                   {formatMoney(monthTotalBase)}
                 </Text>
               </View>
-            </View>
+              </View>
 
-            <View className="flex-1 ml-6 justify-center">
-              {(monthSlices.length === 0
-                ? [{ label: "No expenses", value: 0, color: "#E2E8F0" }]
-                : monthSlices
-              ).map((slice, i) => (
-                <View
-                  key={`${slice.label}-${i}`}
-                  className="flex-row items-center justify-between mb-2"
-                >
-                  <View className="flex-row items-center flex-1 pr-2">
-                    <View
-                      className="w-3 h-3 rounded-full mr-2"
-                      style={{ backgroundColor: slice.color }}
-                    />
-                    <Text
-                      numberOfLines={1}
-                      className="text-app-textSecondary dark:text-white/80 text-sm font-medium"
-                    >
-                      {slice.label}
+              <View className="flex-1 ml-6 justify-center">
+                {(monthSlices.length === 0
+                  ? [{ label: "No expenses", value: 0, color: "#E2E8F0" }]
+                  : monthSlices
+                ).map((slice, i) => (
+                  <View
+                    key={`${slice.label}-${i}`}
+                    className="flex-row items-center justify-between mb-2"
+                  >
+                    <View className="flex-row items-center flex-1 pr-2">
+                      <View
+                        className="w-3 h-3 rounded-full mr-2"
+                        style={{ backgroundColor: slice.color }}
+                      />
+                      <Text
+                        numberOfLines={1}
+                        className="text-app-textSecondary dark:text-appDark-textSecondary text-sm font-medium"
+                      >
+                        {slice.label}
+                      </Text>
+                    </View>
+
+                    <Text className="text-app-textMuted dark:text-appDark-textMuted text-sm font-semibold">
+                      {monthTotalBase > 0
+                        ? `${Math.round((slice.value / monthTotalBase) * 100)}%`
+                        : "0%"}
                     </Text>
                   </View>
-
-                  <Text className="text-app-textMuted dark:text-white/70 text-sm font-semibold">
-                    {monthTotalBase > 0
-                      ? `${Math.round((slice.value / monthTotalBase) * 100)}%`
-                      : "0%"}
-                  </Text>
-                </View>
-              ))}
+                ))}
+              </View>
             </View>
           </View>
         </View>
@@ -324,11 +325,11 @@ const Home = () => {
       {/* Recent */}
       <View className="flex-1 mt-6 px-6">
         <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-lg font-bold text-app-text dark:text-white">
+          <Text className="text-lg font-bold text-app-text dark:text-appDark-text">
             Recent Transactions
           </Text>
           <TouchableOpacity onPress={() => router.push("/(dashboard)/tasks")}>
-            <Text className="text-app-primary dark:text-white font-semibold text-sm">
+            <Text className="text-app-primary dark:text-appDark-primary font-semibold text-sm">
               View All
             </Text>
           </TouchableOpacity>
@@ -343,9 +344,9 @@ const Home = () => {
               <MaterialIcons
                 name="receipt-long"
                 size={48}
-                color={colorScheme === "dark" ? "#FFFFFF" : "#111827"}
+                color={colorScheme === "dark" ? "#E5E7EB" : "#0F172A"}
               />
-              <Text className="text-app-textMuted dark:text-white/70 mt-3 font-medium">
+              <Text className="text-app-textMuted dark:text-appDark-textMuted mt-3 font-medium">
                 No recent activity
               </Text>
             </View>
@@ -358,27 +359,27 @@ const Home = () => {
                 return (
                   <View
                     key={tx.id}
-                    className="flex-row items-center bg-white dark:bg-black p-4 rounded-2xl mb-3 border border-app-border dark:border-white/15"
+                    className="flex-row items-center bg-app-surface dark:bg-appDark-surface p-4 rounded-2xl mb-3 border border-app-border dark:border-appDark-border"
                   >
-                    <View className="w-12 h-12 rounded-full items-center justify-center bg-app-surface2 dark:bg-white/10 border border-app-border dark:border-white/15">
+                    <View className="w-12 h-12 rounded-full items-center justify-center bg-app-surface2 dark:bg-appDark-surface2 border border-app-border dark:border-appDark-border">
                       <MaterialIcons
                         name={isIncome ? "arrow-downward" : "arrow-upward"}
                         size={24}
-                        color={colorScheme === "dark" ? "#FFFFFF" : "#111827"}
+                        color={colorScheme === "dark" ? "#E5E7EB" : "#0F172A"}
                       />
                     </View>
 
                     <View className="flex-1 ml-4">
-                      <Text className="text-app-text dark:text-white font-bold text-base">
+                      <Text className="text-app-text dark:text-appDark-text font-bold text-base">
                         {category}
                       </Text>
-                      <Text className="text-app-textMuted dark:text-white/70 text-xs mt-0.5">
+                      <Text className="text-app-textMuted dark:text-appDark-textMuted text-xs mt-0.5">
                         {formatShortDate(tx.createdAt)}
                         {detail ? ` • ${detail}` : ""}
                       </Text>
                     </View>
 
-                    <Text className="font-bold text-base text-app-text dark:text-white">
+                    <Text className="font-bold text-base text-app-text dark:text-appDark-text">
                       {isIncome ? "+" : "-"}
                       {formatMoney(Math.abs(tx.amount))}
                     </Text>
@@ -389,10 +390,10 @@ const Home = () => {
           )}
 
           <TouchableOpacity
-            onPress={() => router.push("/(dashboard)/news")}
-            className="mt-2 bg-app-primary dark:bg-white rounded-2xl py-4 items-center justify-center"
+            onPress={() => router.push("/(dashboard)/transaction")}
+            className="mt-2 bg-app-primary dark:bg-appDark-primary rounded-2xl py-4 items-center justify-center"
           >
-            <Text className="text-white dark:text-black font-semibold text-base">
+            <Text className="text-app-onPrimary dark:text-appDark-onPrimary font-semibold text-base">
               Add Record
             </Text>
           </TouchableOpacity>

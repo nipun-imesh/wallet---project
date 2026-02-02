@@ -16,9 +16,9 @@ import { AppState, Platform, Pressable, Text, View } from "react-native";
 
 const tabs = [
   { name: "home", icon: "home", title: "Home" },
-  { name: "news", icon: "article", title: "Activity" },
+  { name: "transaction", icon: "article", title: "Transaction" },
   { name: "settings", icon: "settings", title: "Settings" },
-  { name: "tasks", icon: "assignment", title: "Tasks" },
+  { name: "tasks", icon: "assignment", title: "History" },
 ] as const;
 // DRY - Don't Repeat Yourself
 const DashboardLayout = () => {
@@ -198,12 +198,9 @@ const DashboardLayout = () => {
         headerShown: false,
         tabBarActiveTintColor: isDark ? "#FFFFFF" : "#111827",
         tabBarInactiveTintColor: isDark ? "rgba(255,255,255,0.55)" : "#6B7280",
-        tabBarShowLabel: true,
-        tabBarLabelPosition: "below-icon",
-        tabBarLabelStyle: {
-          fontSize: 12,
-          marginBottom: Platform.OS === "ios" ? 6 : 8,
-        },
+        // We render icon + label together in tabBarIcon to avoid label clipping
+        // with custom rounded/absolute-positioned tab bars.
+        tabBarShowLabel: false,
         tabBarStyle: {
           position: "absolute",
           left: 16,
@@ -228,10 +225,20 @@ const DashboardLayout = () => {
           name={tab.name}
           options={{
             title: tab.title,
-            tabBarLabel: tab.title,
-            tabBarIcon: ({ color, size }) => (
-              <MaterialIcons name={tab.icon} color={color} size={size} />
-            ),
+            tabBarIcon: ({ color, size }) => {
+              const iconSize = Math.min(26, Math.max(22, size ?? 24));
+              return (
+                <View className="items-center justify-center" style={{ width: 72 }}>
+                  <MaterialIcons name={tab.icon} color={color} size={iconSize} />
+                  <Text
+                    numberOfLines={1}
+                    style={{ color, fontSize: 12, marginTop: 2, includeFontPadding: false }}
+                  >
+                    {tab.title}
+                  </Text>
+                </View>
+              );
+            },
           }}
         />
       ))}

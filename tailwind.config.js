@@ -13,20 +13,36 @@ module.exports = {
     extend: {
       colors: {
         app: {
-          // Black/White theme (light). Use `dark:` classes for dark mode.
-          bg: "#FFFFFF",
+          // Light theme (non black/white)
+          bg: "#F4F6FB",
           surface: "#FFFFFF",
-          surface2: "#F5F5F5",
-          border: "#E5E5E5",
-          primary: "#000000",
+          surface2: "#EEF2FF",
+          border: "#DDE4F0",
+          primary: "#4F46E5",
+          onPrimary: "#FFFFFF",
 
-          // Keep these semantic tokens available (some screens use them).
-          success: "#000000",
-          danger: "#000000",
+          success: "#16A34A",
+          danger: "#DC2626",
 
-          text: "#000000",
-          textSecondary: "#111111",
-          textMuted: "#555555",
+          text: "#0F172A",
+          textSecondary: "#1E293B",
+          textMuted: "#64748B",
+        },
+        appDark: {
+          // Dark theme (non pure black/white)
+          bg: "#0B1220",
+          surface: "#0F172A",
+          surface2: "#111C33",
+          border: "#1E2A4A",
+          primary: "#818CF8",
+          onPrimary: "#0B1220",
+
+          success: "#22C55E",
+          danger: "#F87171",
+
+          text: "#E5E7EB",
+          textSecondary: "#CBD5E1",
+          textMuted: "#94A3B8",
         },
       },
     },
