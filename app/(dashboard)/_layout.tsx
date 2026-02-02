@@ -17,7 +17,7 @@ import { AppState, Platform, Pressable, Text, View } from "react-native";
 const tabs = [
   { name: "home", icon: "home", title: "Home" },
   { name: "news", icon: "article", title: "Activity" },
-  { name: "profile", icon: "person", title: "Profile" },
+  { name: "settings", icon: "settings", title: "Settings" },
   { name: "tasks", icon: "assignment", title: "Tasks" },
 ] as const;
 // DRY - Don't Repeat Yourself
@@ -198,6 +198,8 @@ const DashboardLayout = () => {
         headerShown: false,
         tabBarActiveTintColor: isDark ? "#FFFFFF" : "#111827",
         tabBarInactiveTintColor: isDark ? "rgba(255,255,255,0.55)" : "#6B7280",
+        tabBarShowLabel: true,
+        tabBarLabelPosition: "below-icon",
         tabBarLabelStyle: {
           fontSize: 12,
           marginBottom: Platform.OS === "ios" ? 6 : 8,
@@ -206,7 +208,7 @@ const DashboardLayout = () => {
           position: "absolute",
           left: 16,
           right: 16,
-          bottom: Platform.OS === "ios" ? 14 : 12,
+          bottom: Platform.OS === "ios" ? 15 : 2,
           height: Platform.OS === "ios" ? 72 : 68,
           paddingTop: 10,
           borderTopWidth: 0,

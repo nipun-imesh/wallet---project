@@ -477,10 +477,56 @@ const Profile = () => {
   ]);
 
   return (
-    <View
-      className="flex-1 bg-app-bg dark:bg-black"
-      style={{ paddingTop: insets.top }}
-    >
+    <View className="flex-1 bg-app-bg dark:bg-black">
+      <View
+        style={{ paddingTop: insets.top + 12 }}
+        className="px-4 pb-3 flex-row items-center justify-between"
+      >
+        <TouchableOpacity
+          accessibilityRole="button"
+          onPress={() => {
+            if (isEditingProfile) {
+              handleCancelEdit();
+              return;
+            }
+            router.back();
+          }}
+          className="w-10 h-10 rounded-full items-center justify-center bg-white dark:bg-black border border-app-border dark:border-white/15"
+        >
+          <MaterialIcons
+            name="arrow-back"
+            size={22}
+            color={colorScheme === "dark" ? "#FFFFFF" : "#111827"}
+          />
+        </TouchableOpacity>
+
+        <Text className="text-lg font-bold text-app-text dark:text-white">
+          Profile
+        </Text>
+
+        {isEditingProfile ? (
+          <TouchableOpacity
+            accessibilityRole="button"
+            onPress={handleSaveProfile}
+            className="px-4 py-2 rounded-2xl bg-app-primary dark:bg-white"
+          >
+            <Text className="text-white dark:text-black font-semibold">
+              Save
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            accessibilityRole="button"
+            onPress={handleStartEdit}
+            className="px-4 py-2 rounded-2xl bg-app-primary dark:bg-white"
+          >
+            <Text className="text-white dark:text-black font-semibold">
+              Edit
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
         <View className="bg-white dark:bg-black rounded-3xl border border-app-border dark:border-white/15 p-5">
           <Text className="text-xs text-app-textMuted dark:text-white/70">
@@ -512,33 +558,9 @@ const Profile = () => {
         </View>
 
         <View className="mt-4 bg-white dark:bg-black rounded-3xl border border-app-border dark:border-white/15 p-5">
-          <View className="flex-row items-center justify-between">
-            <Text className="text-lg font-semibold text-app-text dark:text-white">
-              Profile
-            </Text>
-
-            {isEditingProfile ? (
-              <TouchableOpacity
-                accessibilityRole="button"
-                onPress={handleCancelEdit}
-                className="px-4 py-2 rounded-2xl border border-app-border dark:border-white/15"
-              >
-                <Text className="text-app-text dark:text-white font-semibold">
-                  Cancel
-                </Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                accessibilityRole="button"
-                onPress={handleStartEdit}
-                className="px-4 py-2 rounded-2xl bg-app-primary dark:bg-white"
-              >
-                <Text className="text-white dark:text-black font-semibold">
-                  Edit profile
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
+          <Text className="text-lg font-semibold text-app-text dark:text-white">
+            Profile
+          </Text>
 
           <View className="flex-row items-center mt-4">
             <TouchableOpacity
@@ -563,19 +585,21 @@ const Profile = () => {
                 </Text>
               )}
 
-              <View
-                className={`absolute -bottom-1 -right-1 w-8 h-8 rounded-full items-center justify-center border-2 ${
-                  colorScheme === "dark"
-                    ? "bg-white border-black"
-                    : "bg-app-primary border-white"
-                }`}
-              >
-                <MaterialIcons
-                  name="photo-camera"
-                  size={16}
-                  color={colorScheme === "dark" ? "#000000" : "#FFFFFF"}
-                />
-              </View>
+              {isEditingProfile ? (
+                <View
+                  className={`absolute -bottom-1 -right-1 w-8 h-8 rounded-full items-center justify-center border-2 ${
+                    colorScheme === "dark"
+                      ? "bg-white border-black"
+                      : "bg-app-primary border-white"
+                  }`}
+                >
+                  <MaterialIcons
+                    name="photo-camera"
+                    size={16}
+                    color={colorScheme === "dark" ? "#000000" : "#FFFFFF"}
+                  />
+                </View>
+              ) : null}
             </TouchableOpacity>
 
             <View className="flex-1 ml-4">
@@ -615,16 +639,6 @@ const Profile = () => {
                 placeholder="Your name"
                 placeholderTextColor="#9CA3AF"
               />
-
-              <TouchableOpacity
-                accessibilityRole="button"
-                onPress={handleSaveProfile}
-                className="mt-4 bg-app-primary dark:bg-white rounded-2xl py-3 items-center"
-              >
-                <Text className="text-white dark:text-black font-semibold">
-                  Save changes
-                </Text>
-              </TouchableOpacity>
             </>
           ) : null}
         </View>

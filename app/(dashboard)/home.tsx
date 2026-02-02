@@ -308,6 +308,12 @@ const Home = () => {
                       {slice.label}
                     </Text>
                   </View>
+
+                  <Text className="text-app-textMuted dark:text-white/70 text-sm font-semibold">
+                    {monthTotalBase > 0
+                      ? `${Math.round((slice.value / monthTotalBase) * 100)}%`
+                      : "0%"}
+                  </Text>
                 </View>
               ))}
             </View>
