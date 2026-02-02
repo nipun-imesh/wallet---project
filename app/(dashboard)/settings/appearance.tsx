@@ -29,14 +29,14 @@ const Appearance = () => {
   const isDark = colorScheme === "dark";
 
   return (
-    <View className="flex-1 bg-app-bg dark:bg-black">
+    <View className="flex-1 bg-app-bg dark:bg-appDark-bg">
       <View
         style={{ paddingTop: insets.top + 12 }}
         className="px-6 flex-row items-center justify-between mb-6"
       >
         <Pressable
           onPress={() => router.back()}
-          className="w-10 h-10 rounded-full items-center justify-center bg-white dark:bg-black border border-app-border dark:border-white/15"
+          className="w-10 h-10 rounded-full items-center justify-center bg-app-surface dark:bg-appDark-surface border border-app-border dark:border-appDark-border"
         >
           <MaterialIcons
             name="arrow-back"
@@ -44,7 +44,7 @@ const Appearance = () => {
             color={isDark ? "#FFFFFF" : "#111827"}
           />
         </Pressable>
-        <Text className="text-lg font-bold text-app-text dark:text-white">
+        <Text className="text-lg font-bold text-app-text dark:text-appDark-text">
           Appearance
         </Text>
         <View className="w-10 h-10" />
@@ -53,9 +53,9 @@ const Appearance = () => {
       <View className="px-6">
         <Pressable
           onPress={() => selectScheme("light")}
-          className="bg-white dark:bg-black border border-app-border dark:border-white/15 rounded-2xl px-4 py-4 mb-3 flex-row items-center justify-between"
+          className="bg-app-surface dark:bg-appDark-surface border border-app-border dark:border-appDark-border rounded-2xl px-4 py-4 mb-3 flex-row items-center justify-between"
         >
-          <Text className="text-app-text dark:text-white font-semibold">
+          <Text className="text-app-text dark:text-appDark-text font-semibold">
             Light
           </Text>
           <MaterialIcons
@@ -67,9 +67,9 @@ const Appearance = () => {
 
         <Pressable
           onPress={() => selectScheme("dark")}
-          className="bg-white dark:bg-black border border-app-border dark:border-white/15 rounded-2xl px-4 py-4 mb-3 flex-row items-center justify-between"
+          className="bg-app-surface dark:bg-appDark-surface border border-app-border dark:border-appDark-border rounded-2xl px-4 py-4 mb-3 flex-row items-center justify-between"
         >
-          <Text className="text-app-text dark:text-white font-semibold">
+          <Text className="text-app-text dark:text-appDark-text font-semibold">
             Dark
           </Text>
           <MaterialIcons

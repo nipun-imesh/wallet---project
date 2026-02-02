@@ -47,17 +47,17 @@ const ChangePassword = () => {
   }, [confirmPassword, currentPassword, hideLoader, isLoading, newPassword, showLoader]);
 
   const inputClass =
-    "bg-white dark:bg-black border border-app-border dark:border-white/15 rounded-2xl px-4 py-4 text-app-text dark:text-white";
+    "bg-app-surface dark:bg-appDark-surface border border-app-border dark:border-appDark-border rounded-2xl px-4 py-4 text-app-text dark:text-appDark-text";
 
   return (
-    <View className="flex-1 bg-app-bg dark:bg-black">
+    <View className="flex-1 bg-app-bg dark:bg-appDark-bg">
       <View
         style={{ paddingTop: insets.top + 12 }}
         className="px-6 flex-row items-center justify-between mb-6"
       >
         <Pressable
           onPress={() => router.back()}
-          className="w-10 h-10 rounded-full items-center justify-center bg-white dark:bg-black border border-app-border dark:border-white/15"
+          className="w-10 h-10 rounded-full items-center justify-center bg-app-surface dark:bg-appDark-surface border border-app-border dark:border-appDark-border"
         >
           <MaterialIcons
             name="arrow-back"
@@ -65,14 +65,14 @@ const ChangePassword = () => {
             color={isDark ? "#FFFFFF" : "#111827"}
           />
         </Pressable>
-        <Text className="text-lg font-bold text-app-text dark:text-white">
+        <Text className="text-lg font-bold text-app-text dark:text-appDark-text">
           Change Password
         </Text>
         <View className="w-10 h-10" />
       </View>
 
       <View className="px-6">
-        <Text className="text-app-textMuted dark:text-white/70 text-sm mb-2">
+        <Text className="text-app-textMuted dark:text-appDark-textMuted text-sm mb-2">
           Current password
         </Text>
         <View className="relative">
@@ -96,7 +96,7 @@ const ChangePassword = () => {
           </Pressable>
         </View>
 
-        <Text className="text-app-textMuted dark:text-white/70 text-sm mt-4 mb-2">
+        <Text className="text-app-textMuted dark:text-appDark-textMuted text-sm mt-4 mb-2">
           New password
         </Text>
         <View className="relative">
@@ -120,7 +120,7 @@ const ChangePassword = () => {
           </Pressable>
         </View>
 
-        <Text className="text-app-textMuted dark:text-white/70 text-sm mt-4 mb-2">
+        <Text className="text-app-textMuted dark:text-appDark-textMuted text-sm mt-4 mb-2">
           Confirm new password
         </Text>
         <View className="relative">
@@ -147,9 +147,9 @@ const ChangePassword = () => {
         <Pressable
           onPress={save}
           disabled={isLoading}
-          className="mt-6 bg-app-primary dark:bg-white rounded-2xl py-4 items-center justify-center"
+          className="mt-6 bg-app-primary dark:bg-appDark-primary rounded-2xl py-4 items-center justify-center"
         >
-          <Text className="text-white dark:text-black font-semibold text-base">
+          <Text className="text-app-onPrimary dark:text-appDark-onPrimary font-semibold text-base">
             Save
           </Text>
         </Pressable>

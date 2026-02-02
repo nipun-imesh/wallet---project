@@ -151,7 +151,7 @@ const ProfileSettings = () => {
   }, [hideLoader, isEditing, isLoading, name, photoBase64, showLoader, user?.uid]);
 
   return (
-    <View className="flex-1 bg-app-bg dark:bg-black">
+    <View className="flex-1 bg-app-bg dark:bg-appDark-bg">
       <View
         style={{ paddingTop: insets.top + 12 }}
         className="px-6 flex-row items-center justify-between mb-5"
@@ -164,11 +164,11 @@ const ProfileSettings = () => {
             }
             router.back();
           }}
-          className="w-10 h-10 rounded-full items-center justify-center bg-white dark:bg-black border border-app-border dark:border-white/15"
+          className="w-10 h-10 rounded-full items-center justify-center bg-app-surface dark:bg-appDark-surface border border-app-border dark:border-appDark-border"
         >
           <MaterialIcons name="arrow-back" size={22} color={iconColor} />
         </Pressable>
-        <Text className="text-lg font-bold text-app-text dark:text-white">
+        <Text className="text-lg font-bold text-app-text dark:text-appDark-text">
           My Profile
         </Text>
 
@@ -176,12 +176,12 @@ const ProfileSettings = () => {
       </View>
 
       <View className="px-6">
-        <View className="bg-white dark:bg-black border border-app-border dark:border-white/15 rounded-3xl px-5 py-5">
+        <View className="bg-app-surface dark:bg-appDark-surface border border-app-border dark:border-appDark-border rounded-3xl px-5 py-5">
           <View className="flex-row items-center">
             <Pressable
               onPress={pickImage}
               disabled={!isEditing}
-              className="w-20 h-20 rounded-full border border-app-border dark:border-white/15 items-center justify-center bg-app-surface2 dark:bg-white/10 overflow-hidden relative"
+              className="w-20 h-20 rounded-full border border-app-border dark:border-appDark-border items-center justify-center bg-app-surface2 dark:bg-appDark-surface2 overflow-hidden relative"
             >
               {photoUri ? (
                 <Image
@@ -190,7 +190,7 @@ const ProfileSettings = () => {
                   resizeMode="cover"
                 />
               ) : (
-                <Text className="text-app-primary dark:text-white font-extrabold text-3xl">
+                <Text className="text-app-primary dark:text-appDark-primary font-extrabold text-3xl">
                   {displayInitial}
                 </Text>
               )}
@@ -199,8 +199,8 @@ const ProfileSettings = () => {
                 <View
                   className={`absolute -bottom-1 -right-1 w-7 h-7 rounded-full items-center justify-center border-2 ${
                     isDark
-                      ? "bg-white border-black"
-                      : "bg-app-primary border-white"
+                      ? "bg-appDark-primary border-appDark-bg"
+                      : "bg-app-primary border-app-surface"
                   }`}
                 >
                   <MaterialIcons
@@ -213,11 +213,11 @@ const ProfileSettings = () => {
             </Pressable>
 
             <View className="flex-1 ml-4">
-              <Text className="text-app-text dark:text-white font-extrabold text-lg">
+              <Text className="text-app-text dark:text-appDark-text font-extrabold text-lg">
                 {name || "User"}
               </Text>
               {!!email ? (
-                <Text className="text-app-textMuted dark:text-white/70 text-sm mt-0.5">
+                <Text className="text-app-textMuted dark:text-appDark-textMuted text-sm mt-0.5">
                   {email}
                 </Text>
               ) : null}
@@ -227,9 +227,9 @@ const ProfileSettings = () => {
                   <Pressable
                     onPress={save}
                     disabled={isLoading}
-                    className="px-4 py-2 rounded-2xl bg-app-primary dark:bg-white"
+                    className="px-4 py-2 rounded-2xl bg-app-primary dark:bg-appDark-primary"
                   >
-                    <Text className="text-white dark:text-black font-semibold">
+                    <Text className="text-app-onPrimary dark:text-appDark-onPrimary font-semibold">
                       Save
                     </Text>
                   </Pressable>
@@ -237,9 +237,9 @@ const ProfileSettings = () => {
                   <Pressable
                     onPress={cancelEdit}
                     disabled={isLoading}
-                    className="ml-3 px-4 py-2 rounded-2xl border border-app-border dark:border-white/15"
+                    className="ml-3 px-4 py-2 rounded-2xl border border-app-border dark:border-appDark-border"
                   >
-                    <Text className="text-app-text dark:text-white font-semibold">
+                    <Text className="text-app-text dark:text-appDark-text font-semibold">
                       Cancel
                     </Text>
                   </Pressable>
@@ -247,9 +247,9 @@ const ProfileSettings = () => {
               ) : (
                 <Pressable
                   onPress={startEdit}
-                  className="mt-3 self-start px-4 py-2 rounded-2xl bg-app-primary dark:bg-white"
+                  className="mt-3 self-start px-4 py-2 rounded-2xl bg-app-primary dark:bg-appDark-primary"
                 >
-                  <Text className="text-white dark:text-black font-semibold">
+                  <Text className="text-app-onPrimary dark:text-appDark-onPrimary font-semibold">
                     Edit Profile
                   </Text>
                 </Pressable>
@@ -260,7 +260,7 @@ const ProfileSettings = () => {
 
         {isEditing ? (
           <>
-            <Text className="text-app-textMuted dark:text-white/70 text-sm mt-5 mb-2">
+            <Text className="text-app-textMuted dark:text-appDark-textMuted text-sm mt-5 mb-2">
               Your name
             </Text>
             <TextInput
@@ -268,12 +268,12 @@ const ProfileSettings = () => {
               onChangeText={setName}
               placeholder="Your name"
               placeholderTextColor={isDark ? "rgba(255,255,255,0.45)" : "#9CA3AF"}
-              className="bg-white dark:bg-black border border-app-border dark:border-white/15 rounded-2xl px-4 py-4 text-app-text dark:text-white"
+              className="bg-app-surface dark:bg-appDark-surface border border-app-border dark:border-appDark-border rounded-2xl px-4 py-4 text-app-text dark:text-appDark-text"
             />
           </>
         ) : (
           <>
-            <Text className="text-app-textMuted dark:text-white/70 text-sm mt-5">
+            <Text className="text-app-textMuted dark:text-appDark-textMuted text-sm mt-5">
               Tap “Edit Profile” to update your name and photo.
             </Text>
           </>

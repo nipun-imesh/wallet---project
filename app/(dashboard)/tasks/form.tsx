@@ -3,6 +3,7 @@ import { addTask, getTaskById, updateTask } from "@/services/taskService";
 import { Task } from "@/types/task";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useColorScheme } from "nativewind";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -18,6 +19,8 @@ const TaskForm = () => {
   const router = useRouter();
   const { taskId } = useLocalSearchParams();
   const { showLoader, hideLoader, isLoading } = useLoader();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === "dark";
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -103,17 +106,26 @@ const TaskForm = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 24 }}>
+    <ScrollView
+      className="flex-1 bg-app-bg dark:bg-appDark-bg"
+      contentContainerStyle={{ flexGrow: 1, padding: 24 }}
+    >
       <TouchableOpacity
         className="flex-row items-center mb-6"
         onPress={() => router.back()}
       >
-        <MaterialIcons name="arrow-back-ios" size={24} color="#333" />
-        <Text className="text-gray-800 font-medium ml-1">Back</Text>
+        <MaterialIcons
+          name="arrow-back-ios"
+          size={24}
+          color={isDark ? "#E5E7EB" : "#111827"}
+        />
+        <Text className="text-app-text dark:text-appDark-text font-medium ml-1">
+          Back
+        </Text>
       </TouchableOpacity>
 
-      <View className="p-6 rounded-2xl bg-white border border-gray-300 shadow-md">
-        <Text className="text-gray-800 text-lg font-semibold mb-2">
+      <View className="p-6 rounded-2xl bg-app-surface dark:bg-appDark-surface border border-app-border dark:border-appDark-border shadow-md">
+        <Text className="text-app-text dark:text-appDark-text text-lg font-semibold mb-2">
           Task Title
         </Text>
         <TextInput
@@ -121,10 +133,10 @@ const TaskForm = () => {
           placeholderTextColor="#999"
           value={title}
           onChangeText={setTitle}
-          className="mb-5 p-4 rounded-xl bg-gray-100 text-gray-800 border border-gray-300 text-base font-medium"
+          className="mb-5 p-4 rounded-xl bg-app-surface2 dark:bg-appDark-surface2 text-app-text dark:text-appDark-text border border-app-border dark:border-appDark-border text-base font-medium"
         />
 
-        <Text className="text-gray-800 text-lg font-semibold mb-2">
+        <Text className="text-app-text dark:text-appDark-text text-lg font-semibold mb-2">
           Description
         </Text>
         <TextInput
@@ -133,10 +145,10 @@ const TaskForm = () => {
           value={description}
           onChangeText={setDescription}
           multiline
-          className="mb-6 p-4 rounded-xl bg-gray-100 text-gray-800 border border-gray-300 text-base font-medium h-32"
+          className="mb-6 p-4 rounded-xl bg-app-surface2 dark:bg-appDark-surface2 text-app-text dark:text-appDark-text border border-app-border dark:border-appDark-border text-base font-medium h-32"
         />
 
-        <Text className="text-gray-800 text-lg font-semibold mb-2">
+        <Text className="text-app-text dark:text-appDark-text text-lg font-semibold mb-2">
           Expense Amount
         </Text>
         <TextInput
@@ -145,10 +157,10 @@ const TaskForm = () => {
           value={amount}
           onChangeText={setAmount}
           keyboardType="decimal-pad"
-          className="mb-5 p-4 rounded-xl bg-gray-100 text-gray-800 border border-gray-300 text-base font-medium"
+          className="mb-5 p-4 rounded-xl bg-app-surface2 dark:bg-appDark-surface2 text-app-text dark:text-appDark-text border border-app-border dark:border-appDark-border text-base font-medium"
         />
 
-        <Text className="text-gray-800 text-lg font-semibold mb-2">
+        <Text className="text-app-text dark:text-appDark-text text-lg font-semibold mb-2">
           Category
         </Text>
 
@@ -160,12 +172,18 @@ const TaskForm = () => {
                 key={c}
                 className={`mr-2 mb-2 px-4 py-2 rounded-full border ${
                   active
-                    ? "bg-gray-900 border-gray-900"
-                    : "bg-white border-gray-300"
+                    ? "bg-app-primary dark:bg-appDark-primary border-app-primary dark:border-appDark-primary"
+                    : "bg-app-surface dark:bg-appDark-surface border-app-border dark:border-appDark-border"
                 }`}
                 onPress={() => setCategory(c)}
               >
-                <Text className={active ? "text-white" : "text-gray-700"}>
+                <Text
+                  className={
+                    active
+                      ? "text-app-onPrimary dark:text-appDark-onPrimary"
+                      : "text-app-textSecondary dark:text-appDark-textSecondary"
+                  }
+                >
                   {c}
                 </Text>
               </TouchableOpacity>
@@ -178,16 +196,18 @@ const TaskForm = () => {
           placeholderTextColor="#999"
           value={category}
           onChangeText={setCategory}
-          className="mb-6 p-4 rounded-xl bg-gray-100 text-gray-800 border border-gray-300 text-base font-medium"
+          className="mb-6 p-4 rounded-xl bg-app-surface2 dark:bg-appDark-surface2 text-app-text dark:text-appDark-text border border-app-border dark:border-appDark-border text-base font-medium"
         />
 
         <Pressable
           className={`px-6 py-3 rounded-2xl ${
-            taskId ? "bg-blue-600/80" : "bg-green-600/80"
+            taskId
+              ? "bg-app-primary dark:bg-appDark-primary"
+              : "bg-app-success dark:bg-appDark-success"
           }`}
           onPress={handleSubmit}
         >
-          <Text className="text-white text-lg text-center">
+          <Text className="text-app-onPrimary dark:text-appDark-onPrimary text-lg text-center">
             {isLoading ? "Please wait..." : taskId ? "Update Task" : "Add Task"}
           </Text>
         </Pressable>

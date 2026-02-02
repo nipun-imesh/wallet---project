@@ -17,8 +17,8 @@ import { AppState, Platform, Pressable, Text, View } from "react-native";
 const tabs = [
   { name: "home", icon: "home", title: "Home" },
   { name: "transaction", icon: "article", title: "Transaction" },
-  { name: "settings", icon: "settings", title: "Settings" },
   { name: "tasks", icon: "assignment", title: "History" },
+  { name: "settings", icon: "settings", title: "Settings" },
 ] as const;
 // DRY - Don't Repeat Yourself
 const DashboardLayout = () => {
