@@ -154,11 +154,11 @@ const Login = () => {
 
       <View style={{ zIndex: 1, position: "relative" }}>
         <View className="items-center mb-6">
-          <View className="w-20 h-20 rounded-3xl bg-app-primary items-center justify-center">
+          <View className="w-20 h-20 rounded-3xl bg-app-primary overflow-hidden">
             <Image
               source={require("../../assets/images/icon.png")}
-              style={{ width: 52, height: 52 }}
-              resizeMode="contain"
+              style={{ width: "100%", height: "100%" }}
+              resizeMode="cover"
             />
           </View>
           <Text className="text-3xl font-bold text-app-text dark:text-white mt-4">
