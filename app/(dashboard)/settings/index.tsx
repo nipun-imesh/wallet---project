@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import React, { useMemo } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useColorScheme } from "nativewind";
 
 type Row = {
   title: string;
@@ -13,6 +14,12 @@ type Row = {
 
 const Settings = () => {
   const insets = useSafeAreaInsets();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === "dark";
+
+  const iconColor = isDark ? "#FFFFFF" : "#111827";
+  const chevronColor = isDark ? "rgba(255,255,255,0.6)" : "#6B7280";
+
 
   const rows: Row[] = useMemo(
     () => [
@@ -66,7 +73,7 @@ const Settings = () => {
             className="bg-white dark:bg-black border border-app-border dark:border-white/15 rounded-2xl px-4 py-4 mb-3 flex-row items-center"
           >
             <View className="w-10 h-10 rounded-full items-center justify-center bg-app-surface2 dark:bg-white/10 border border-app-border dark:border-white/15">
-              <MaterialIcons name={row.icon} size={22} color="#111827" />
+              <MaterialIcons name={row.icon} size={22} color={iconColor} />
             </View>
 
             <View className="flex-1 ml-4">
@@ -78,7 +85,7 @@ const Settings = () => {
               </Text>
             </View>
 
-            <MaterialIcons name="chevron-right" size={24} color="#6B7280" />
+            <MaterialIcons name="chevron-right" size={24} color={chevronColor} />
           </Pressable>
         ))}
       </View>

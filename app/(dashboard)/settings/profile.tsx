@@ -20,13 +20,29 @@ const ProfileSettings = () => {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
 
+  const iconColor = isDark ? "#FFFFFF" : "#111827";
+
   const [name, setName] = useState("");
   const [photoBase64, setPhotoBase64] = useState<string>("");
+  const [initialName, setInitialName] = useState("");
+  const [initialPhoto, setInitialPhoto] = useState<string>("");
+  const [isEditing, setIsEditing] = useState(false);
+
+  const photoUri = useMemo(() => {
+    const raw = String(photoBase64 || "").trim();
+    if (!raw) return "";
+    if (raw.startsWith("data:")) return raw;
+    return `data:image/jpeg;base64,${raw}`;
+  }, [photoBase64]);
 
   const displayInitial = useMemo(() => {
     const value = String(name || user?.displayName || user?.email || "U");
     return value.trim().slice(0, 1).toUpperCase() || "U";
   }, [name, user?.displayName, user?.email]);
+
+  const email = useMemo(() => {
+    return String(user?.email || "").trim();
+  }, [user?.email]);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,12 +52,19 @@ const ProfileSettings = () => {
       try {
         const p = await getUserProfile(user.uid);
         if (cancelled) return;
-        setName(String(p?.name || user.displayName || "").trim());
-        setPhotoBase64(String(p?.photoBase64 || ""));
+        const nextName = String(p?.name || user.displayName || "").trim();
+        const nextPhoto = String(p?.photoBase64 || "");
+        setName(nextName);
+        setPhotoBase64(nextPhoto);
+        setInitialName(nextName);
+        setInitialPhoto(nextPhoto);
       } catch {
         if (cancelled) return;
-        setName(String(user?.displayName || "").trim());
+        const nextName = String(user?.displayName || "").trim();
+        setName(nextName);
         setPhotoBase64("");
+        setInitialName(nextName);
+        setInitialPhoto("");
       } finally {
         hideLoader();
       }
@@ -55,6 +78,7 @@ const ProfileSettings = () => {
   const pickImage = useCallback(async () => {
     if (!user?.uid) return;
     if (isLoading) return;
+    if (!isEditing) return;
 
     suppressNextBiometricPrompt();
     await suppressNextBiometricPromptForUser(user.uid);
@@ -81,7 +105,19 @@ const ProfileSettings = () => {
     }
 
     setPhotoBase64(asset.base64);
-  }, [isLoading, user?.uid]);
+  }, [isEditing, isLoading, user?.uid]);
+
+  const startEdit = useCallback(() => {
+    if (isLoading) return;
+    setIsEditing(true);
+  }, [isLoading]);
+
+  const cancelEdit = useCallback(() => {
+    if (isLoading) return;
+    setName(initialName);
+    setPhotoBase64(initialPhoto);
+    setIsEditing(false);
+  }, [initialName, initialPhoto, isLoading]);
 
   const save = useCallback(async () => {
     if (!user?.uid) {
@@ -89,6 +125,7 @@ const ProfileSettings = () => {
       return;
     }
     if (isLoading) return;
+    if (!isEditing) return;
 
     const trimmed = name.trim();
     if (!trimmed) {
@@ -102,75 +139,145 @@ const ProfileSettings = () => {
         name: trimmed,
         photoBase64: photoBase64 || "",
       });
+      setInitialName(trimmed);
+      setInitialPhoto(photoBase64 || "");
+      setIsEditing(false);
       Alert.alert("Profile", "Profile updated");
-      router.back();
     } catch (e: any) {
       Alert.alert("Profile", e?.message || "Failed to update profile");
     } finally {
       hideLoader();
     }
-  }, [hideLoader, isLoading, name, photoBase64, showLoader, user?.uid]);
+  }, [hideLoader, isEditing, isLoading, name, photoBase64, showLoader, user?.uid]);
 
   return (
     <View className="flex-1 bg-app-bg dark:bg-black">
       <View
         style={{ paddingTop: insets.top + 12 }}
-        className="px-6 flex-row items-center justify-between mb-6"
+        className="px-6 flex-row items-center justify-between mb-5"
       >
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => {
+            if (isEditing) {
+              cancelEdit();
+              return;
+            }
+            router.back();
+          }}
           className="w-10 h-10 rounded-full items-center justify-center bg-white dark:bg-black border border-app-border dark:border-white/15"
         >
-          <MaterialIcons
-            name="arrow-back"
-            size={22}
-            color={isDark ? "#FFFFFF" : "#111827"}
-          />
+          <MaterialIcons name="arrow-back" size={22} color={iconColor} />
         </Pressable>
         <Text className="text-lg font-bold text-app-text dark:text-white">
-          Profile
+          My Profile
         </Text>
+
         <View className="w-10 h-10" />
       </View>
 
       <View className="px-6">
-        <Pressable
-          onPress={pickImage}
-          className="self-center w-24 h-24 rounded-full border border-app-border dark:border-white/15 items-center justify-center bg-white dark:bg-black overflow-hidden"
-        >
-          {photoBase64 ? (
-            <Image
-              source={{ uri: `data:image/jpeg;base64,${photoBase64}` }}
-              style={{ width: 96, height: 96 }}
-              resizeMode="cover"
-            />
-          ) : (
-            <Text className="text-app-primary dark:text-white font-extrabold text-2xl">
-              {displayInitial}
+        <View className="bg-white dark:bg-black border border-app-border dark:border-white/15 rounded-3xl px-5 py-5">
+          <View className="flex-row items-center">
+            <Pressable
+              onPress={pickImage}
+              disabled={!isEditing}
+              className="w-20 h-20 rounded-full border border-app-border dark:border-white/15 items-center justify-center bg-app-surface2 dark:bg-white/10 overflow-hidden relative"
+            >
+              {photoUri ? (
+                <Image
+                  source={{ uri: photoUri }}
+                  style={{ width: 80, height: 80 }}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Text className="text-app-primary dark:text-white font-extrabold text-3xl">
+                  {displayInitial}
+                </Text>
+              )}
+
+              {isEditing ? (
+                <View
+                  className={`absolute -bottom-1 -right-1 w-7 h-7 rounded-full items-center justify-center border-2 ${
+                    isDark
+                      ? "bg-white border-black"
+                      : "bg-app-primary border-white"
+                  }`}
+                >
+                  <MaterialIcons
+                    name="photo-camera"
+                    size={14}
+                    color={isDark ? "#000000" : "#FFFFFF"}
+                  />
+                </View>
+              ) : null}
+            </Pressable>
+
+            <View className="flex-1 ml-4">
+              <Text className="text-app-text dark:text-white font-extrabold text-lg">
+                {name || "User"}
+              </Text>
+              {!!email ? (
+                <Text className="text-app-textMuted dark:text-white/70 text-sm mt-0.5">
+                  {email}
+                </Text>
+              ) : null}
+
+              {isEditing ? (
+                <View className="flex-row items-center mt-3">
+                  <Pressable
+                    onPress={save}
+                    disabled={isLoading}
+                    className="px-4 py-2 rounded-2xl bg-app-primary dark:bg-white"
+                  >
+                    <Text className="text-white dark:text-black font-semibold">
+                      Save
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={cancelEdit}
+                    disabled={isLoading}
+                    className="ml-3 px-4 py-2 rounded-2xl border border-app-border dark:border-white/15"
+                  >
+                    <Text className="text-app-text dark:text-white font-semibold">
+                      Cancel
+                    </Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <Pressable
+                  onPress={startEdit}
+                  className="mt-3 self-start px-4 py-2 rounded-2xl bg-app-primary dark:bg-white"
+                >
+                  <Text className="text-white dark:text-black font-semibold">
+                    Edit Profile
+                  </Text>
+                </Pressable>
+              )}
+            </View>
+          </View>
+        </View>
+
+        {isEditing ? (
+          <>
+            <Text className="text-app-textMuted dark:text-white/70 text-sm mt-5 mb-2">
+              Your name
             </Text>
-          )}
-        </Pressable>
-
-        <Text className="text-app-textMuted dark:text-white/70 text-sm mt-6 mb-2">
-          Name
-        </Text>
-        <TextInput
-          value={name}
-          onChangeText={setName}
-          placeholder="Your name"
-          placeholderTextColor={isDark ? "rgba(255,255,255,0.45)" : "#9CA3AF"}
-          className="bg-white dark:bg-black border border-app-border dark:border-white/15 rounded-2xl px-4 py-4 text-app-text dark:text-white"
-        />
-
-        <Pressable
-          onPress={save}
-          disabled={isLoading}
-          className="mt-6 bg-app-primary dark:bg-white rounded-2xl py-4 items-center justify-center"
-        >
-          <Text className="text-white dark:text-black font-semibold text-base">
-            Save
-          </Text>
-        </Pressable>
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              placeholder="Your name"
+              placeholderTextColor={isDark ? "rgba(255,255,255,0.45)" : "#9CA3AF"}
+              className="bg-white dark:bg-black border border-app-border dark:border-white/15 rounded-2xl px-4 py-4 text-app-text dark:text-white"
+            />
+          </>
+        ) : (
+          <>
+            <Text className="text-app-textMuted dark:text-white/70 text-sm mt-5">
+              Tap “Edit Profile” to update your name and photo.
+            </Text>
+          </>
+        )}
       </View>
     </View>
   );

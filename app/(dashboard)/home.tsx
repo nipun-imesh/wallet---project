@@ -257,7 +257,7 @@ const Home = () => {
           </View>
 
           <TouchableOpacity
-            onPress={() => router.push("/(dashboard)/profile")}
+            onPress={() => router.push("/(dashboard)/settings/profile")}
             className="w-12 h-12 rounded-full border border-app-border dark:border-white/15 items-center justify-center bg-app-surface2 dark:bg-white/10"
           >
             <Text className="text-app-primary dark:text-white font-bold text-lg">
