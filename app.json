@@ -16,7 +16,10 @@
       }
     },
     "android": {
-      "permissions": ["CAMERA", "READ_MEDIA_IMAGES"],
+      "permissions": [
+        "CAMERA",
+        "READ_MEDIA_IMAGES"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -50,6 +53,12 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
-    "extra": {}
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d75c16f3-e4ae-43b9-a612-90bba41930ed"
+      }
+    },
+    "owner": "nipunimesh"
   }
 }
