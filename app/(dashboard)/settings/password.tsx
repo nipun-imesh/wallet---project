@@ -1,5 +1,5 @@
-import { useLoader } from "@/hooks/useLoader";
-import { changeUserPassword } from "@/services/authService";
+import { useLoader } from "../../../hooks/useLoader";
+import { changeUserPassword } from "../../../services/authService";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useColorScheme } from "nativewind";

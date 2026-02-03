@@ -4,7 +4,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Alert, Modal, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColorScheme } from "nativewind";
-import { logoutUser } from "@/services/authService";
+import { logoutUser } from "../../../services/authService";
 
 type Row = {
   title: string;

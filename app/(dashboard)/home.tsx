@@ -1,10 +1,10 @@
-import { useAuth } from "@/hooks/useAuth";
-import { useLoader } from "@/hooks/useLoader";
+import { useAuth } from "../../hooks/useAuth";
+import { useLoader } from "../../hooks/useLoader";
 import {
   getFinanceSummary,
   listFinanceTransactions,
-} from "@/services/financeService";
-import type { FinanceSummary, FinanceTransaction } from "@/types/finance";
+} from "../../services/financeService";
+import type { FinanceSummary, FinanceTransaction } from "../../types/finance";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { router, useFocusEffect } from "expo-router";

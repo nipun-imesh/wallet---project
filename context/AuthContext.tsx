@@ -1,5 +1,5 @@
-import { useLoader } from "@/hooks/useLoader"
-import { auth } from "@/services/firebase"
+import { useLoader } from "../hooks/useLoader";
+import { auth } from "../services/firebase"
 import { onAuthStateChanged, User } from "firebase/auth"
 import { createContext, ReactNode, useEffect, useState } from "react"
 

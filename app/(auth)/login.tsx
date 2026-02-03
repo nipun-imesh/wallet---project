@@ -1,5 +1,5 @@
-import { useLoader } from "@/hooks/useLoader";
-import { login, loginWithGoogleIdToken } from "@/services/authService";
+import { useLoader } from "../../hooks/useLoader";
+import { login, loginWithGoogleIdToken } from "../../services/authService";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import * as Google from "expo-auth-session/providers/google";
 import { useRouter } from "expo-router";

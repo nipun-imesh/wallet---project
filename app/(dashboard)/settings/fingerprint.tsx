@@ -1,12 +1,12 @@
-import { useAuth } from "@/hooks/useAuth";
-import { useLoader } from "@/hooks/useLoader";
+import { useAuth } from "../../../hooks/useAuth";
+import { useLoader } from "../../../hooks/useLoader";
 import {
   confirmBiometric,
   ensureBiometricAvailable,
   getBiometricEnabled,
   markBiometricJustEnabled,
   setBiometricEnabled,
-} from "@/services/biometricService";
+} from "../../../services/biometricService";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useColorScheme } from "nativewind";

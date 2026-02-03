@@ -1,5 +1,5 @@
-import { useAuth } from "@/hooks/useAuth";
-import { logoutUser } from "@/services/authService";
+import { useAuth } from "../../hooks/useAuth";
+import { logoutUser } from "../../services/authService";
 import {
   confirmBiometric,
   consumeBiometricJustEnabled,
@@ -7,7 +7,7 @@ import {
   consumeSuppressedBiometricPromptForUser,
   ensureBiometricAvailable,
   getBiometricEnabled,
-} from "@/services/biometricService";
+} from "../../services/biometricService";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";

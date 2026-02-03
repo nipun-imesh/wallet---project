@@ -3,9 +3,19 @@ module.exports = function (api) {
   return {
     presets: [
       ["babel-preset-expo", { jsxImportSource: "nativewind" }],
-      "nativewind/babel", 
+      "nativewind/babel",
     ],
     plugins: [
+      // මෙන්න මේ කොටස එකතු කරන්න
+      [
+        "module-resolver",
+        {
+          root: ["./"],
+          alias: {
+            "@": "./",
+          },
+        },
+      ],
       "react-native-reanimated/plugin",
     ],
   };

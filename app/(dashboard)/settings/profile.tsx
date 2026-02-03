@@ -1,10 +1,10 @@
-import { useAuth } from "@/hooks/useAuth";
-import { useLoader } from "@/hooks/useLoader";
-import { getUserProfile, updateUserProfile } from "@/services/authService";
+import { useAuth } from "../../../hooks/useAuth";
+import { useLoader } from "../../../hooks/useLoader";
+import { getUserProfile, updateUserProfile } from "../../../services/authService";
 import {
   suppressNextBiometricPrompt,
   suppressNextBiometricPromptForUser,
-} from "@/services/biometricService";
+} from "../../../services/biometricService";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
