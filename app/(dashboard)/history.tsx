@@ -120,6 +120,9 @@ const Tasks = () => {
     >
       <View className="bg-app-surface dark:bg-appDark-surface px-6 py-4 flex-row items-center justify-between border-b border-app-border dark:border-appDark-border">
         <View>
+          <Text className="text-2xl font-extrabold text-app-text dark:text-appDark-text">
+            History
+          </Text>
           <Text className="text-xs text-app-textMuted dark:text-appDark-textMuted">
             Compare
           </Text>

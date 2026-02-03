@@ -233,6 +233,13 @@ const Home = () => {
     return { size, cx, cy, paths };
   }, [monthSlices]);
 
+  const monthSliceTotal = useMemo(() => {
+    return monthSlices.reduce(
+      (acc, s) => acc + (Number.isFinite(s.value) ? s.value : 0),
+      0,
+    );
+  }, [monthSlices]);
+
   useFocusEffect(
     useCallback(() => {
       fetchSummary();
@@ -308,6 +315,12 @@ const Home = () => {
                       {slice.label}
                     </Text>
                   </View>
+
+                  <Text className="text-app-textMuted dark:text-white/70 text-sm font-semibold tabular-nums">
+                    {monthSliceTotal > 0
+                      ? `${Math.round((slice.value / monthSliceTotal) * 100)}%`
+                      : "0%"}
+                  </Text>
                 </View>
               ))}
             </View>
