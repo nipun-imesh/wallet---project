@@ -115,15 +115,15 @@ const Tasks = () => {
 
   return (
     <View
-      className="flex-1 bg-app-bg dark:bg-black"
+      className="flex-1 bg-app-bg dark:bg-appDark-bg"
       style={{ paddingTop: insets.top }}
     >
-      <View className="bg-white dark:bg-black px-6 py-4 flex-row items-center justify-between border-b border-app-border dark:border-white/15">
+      <View className="bg-app-surface dark:bg-appDark-surface px-6 py-4 flex-row items-center justify-between border-b border-app-border dark:border-appDark-border">
         <View>
-          <Text className="text-xs text-app-textMuted dark:text-white/70">
+          <Text className="text-xs text-app-textMuted dark:text-appDark-textMuted">
             Compare
           </Text>
-          <Text className="text-xl font-semibold text-app-text dark:text-white">
+          <Text className="text-xl font-semibold text-app-text dark:text-appDark-text">
             This month vs last month
           </Text>
         </View>
@@ -141,11 +141,11 @@ const Tasks = () => {
           paddingBottom: tabBarHeight + 24,
         }}
       >
-        <View className="bg-white dark:bg-black rounded-3xl border border-app-border dark:border-white/15 p-5">
-          <Text className="text-lg font-semibold text-app-text dark:text-white">
+        <View className="bg-app-surface dark:bg-appDark-surface rounded-3xl border border-app-border dark:border-appDark-border p-5">
+          <Text className="text-lg font-semibold text-app-text dark:text-appDark-text">
             Bar chart
           </Text>
-          <Text className="text-xs text-app-textMuted dark:text-white/70 mt-1">
+          <Text className="text-xs text-app-textMuted dark:text-appDark-textMuted mt-1">
             Expenses comparison (last month vs this month)
           </Text>
 
@@ -161,11 +161,11 @@ const Tasks = () => {
               </View>
               <View className="mt-2 h-3 rounded-full bg-gray-200 dark:bg-white/15 overflow-hidden">
                 <View
-                  className="h-3 bg-red-500"
+                  className="h-3 bg-app-primary dark:bg-appDark-primary"
                   style={{ width: `${monthModel.last.ratio * 100}%` }}
                 />
               </View>
-              <Text className="text-xs text-app-textMuted dark:text-white/70 mt-2">
+              <Text className="text-xs text-app-textMuted dark:text-appDark-textMuted mt-2">
                 Income {formatMoney(monthModel.last.income)} • Remaining{" "}
                 {formatMoney(monthModel.last.balance)}
               </Text>
@@ -182,11 +182,11 @@ const Tasks = () => {
               </View>
               <View className="mt-2 h-3 rounded-full bg-gray-200 dark:bg-white/15 overflow-hidden">
                 <View
-                  className="h-3 bg-red-500"
+                  className="h-3 bg-app-primary dark:bg-appDark-primary"
                   style={{ width: `${monthModel.this.ratio * 100}%` }}
                 />
               </View>
-              <Text className="text-xs text-app-textMuted dark:text-white/70 mt-2">
+              <Text className="text-xs text-app-textMuted dark:text-appDark-textMuted mt-2">
                 Income {formatMoney(monthModel.this.income)} • Remaining{" "}
                 {formatMoney(monthModel.this.balance)}
               </Text>
@@ -194,8 +194,8 @@ const Tasks = () => {
           </View>
         </View>
 
-        <View className="mt-4 bg-white dark:bg-black rounded-3xl border border-app-border dark:border-white/15 p-5">
-          <Text className="text-lg font-semibold text-app-text dark:text-white">
+        <View className="mt-4 bg-app-surface dark:bg-appDark-surface rounded-3xl border border-app-border dark:border-appDark-border p-5">
+          <Text className="text-lg font-semibold text-app-text dark:text-appDark-text">
             Summary
           </Text>
 

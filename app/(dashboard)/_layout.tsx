@@ -1,12 +1,12 @@
 import { useAuth } from "@/hooks/useAuth";
 import { logoutUser } from "@/services/authService";
 import {
-    confirmBiometric,
-    consumeBiometricJustEnabled,
-    consumeSuppressedBiometricPrompt,
-    consumeSuppressedBiometricPromptForUser,
-    ensureBiometricAvailable,
-    getBiometricEnabled,
+  confirmBiometric,
+  consumeBiometricJustEnabled,
+  consumeSuppressedBiometricPrompt,
+  consumeSuppressedBiometricPromptForUser,
+  ensureBiometricAvailable,
+  getBiometricEnabled,
 } from "@/services/biometricService";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
@@ -14,13 +14,21 @@ import { useColorScheme } from "nativewind";
 import React, { useEffect, useRef, useState } from "react";
 import { AppState, Platform, Pressable, Text, View } from "react-native";
 
+const TAB_ACTIVE_LIGHT = "#4F46E5"; // app.primary
+const TAB_ACTIVE_DARK = "#818CF8"; // appDark.primary
+const TAB_INACTIVE_LIGHT = "#64748B"; // app.textMuted
+const TAB_INACTIVE_DARK = "#94A3B8"; // appDark.textMuted
+const TAB_BG_LIGHT = "#FFFFFF"; // app.surface
+const TAB_BG_DARK = "#111C33"; // appDark.surface2 (higher contrast vs bg)
+const TAB_BORDER_LIGHT = "#DDE4F0"; // app.border
+const TAB_BORDER_DARK = "#1E2A4A"; // appDark.border
+
 const tabs = [
   { name: "home", icon: "home", title: "Home" },
-  { name: "news", icon: "article", title: "Activity" },
-  { name: "profile", icon: "person", title: "Profile" },
-  { name: "tasks", icon: "assignment", title: "Tasks" },
+  { name: "transaction", icon: "swap-horiz", title: "Transaction" },
+  { name: "history", icon: "article", title: "History" },
+  { name: "settings", icon: "settings", title: "Settings" },
 ] as const;
-// DRY - Don't Repeat Yourself
 const DashboardLayout = () => {
   const { user } = useAuth();
   const router = useRouter();
@@ -196,8 +204,10 @@ const DashboardLayout = () => {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: isDark ? "#FFFFFF" : "#111827",
-        tabBarInactiveTintColor: isDark ? "rgba(255,255,255,0.55)" : "#6B7280",
+        tabBarActiveTintColor: isDark ? TAB_ACTIVE_DARK : TAB_ACTIVE_LIGHT,
+        tabBarInactiveTintColor: isDark
+          ? TAB_INACTIVE_DARK
+          : TAB_INACTIVE_LIGHT,
         tabBarLabelStyle: {
           fontSize: 12,
           marginBottom: Platform.OS === "ios" ? 6 : 8,
@@ -206,12 +216,15 @@ const DashboardLayout = () => {
           position: "absolute",
           left: 16,
           right: 16,
-          bottom: Platform.OS === "ios" ? 14 : 12,
+          // Move the floating menu slightly lower.
+          bottom: Platform.OS === "ios" ? 8 : 6,
           height: Platform.OS === "ios" ? 72 : 68,
           paddingTop: 10,
           borderTopWidth: 0,
           borderRadius: 26,
-          backgroundColor: isDark ? "#000000" : "#FFFFFF",
+          backgroundColor: isDark ? TAB_BG_DARK : TAB_BG_LIGHT,
+          borderWidth: 1,
+          borderColor: isDark ? TAB_BORDER_DARK : TAB_BORDER_LIGHT,
           elevation: 12,
           shadowColor: "#000000",
           shadowOpacity: 0.08,
@@ -223,6 +236,7 @@ const DashboardLayout = () => {
     >
       {tabs.map((tab) => (
         <Tabs.Screen
+          key={tab.name}
           name={tab.name}
           options={{
             title: tab.title,

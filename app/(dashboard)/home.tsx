@@ -240,27 +240,27 @@ const Home = () => {
   );
 
   return (
-    <View className="flex-1 bg-app-bg dark:bg-black">
+    <View className="flex-1 bg-app-bg dark:bg-appDark-bg">
       {/* Header */}
-      <View className="bg-white dark:bg-black pb-6 rounded-b-[2.5rem] border-b border-app-border dark:border-white/15">
+      <View className="bg-app-surface dark:bg-appDark-surface pb-6 rounded-b-[2.5rem] border-b border-app-border dark:border-appDark-border">
         <View
           style={{ paddingTop: insets.top + 12 }}
           className="px-6 flex-row justify-between items-center mb-6"
         >
           <View>
-            <Text className="text-app-textMuted dark:text-white/70 text-sm font-medium tracking-wide">
+            <Text className="text-app-textMuted dark:text-appDark-textMuted text-sm font-medium tracking-wide">
               Total Balance
             </Text>
-            <Text className="text-4xl font-extrabold text-app-text dark:text-white mt-1 tracking-tight">
+            <Text className="text-4xl font-extrabold text-app-text dark:text-appDark-text mt-1 tracking-tight">
               {salaryAmount}
             </Text>
           </View>
 
           <TouchableOpacity
-            onPress={() => router.push("/(dashboard)/profile")}
-            className="w-12 h-12 rounded-full border border-app-border dark:border-white/15 items-center justify-center bg-app-surface2 dark:bg-white/10"
+            onPress={() => router.push("/(dashboard)/transaction")}
+            className="w-12 h-12 rounded-full items-center justify-center bg-app-primary dark:bg-appDark-primary"
           >
-            <Text className="text-app-primary dark:text-white font-bold text-lg">
+            <Text className="text-app-onPrimary dark:text-appDark-onPrimary font-bold text-lg">
               {user?.displayName?.[0]?.toUpperCase() || "U"}
             </Text>
           </TouchableOpacity>
@@ -321,8 +321,8 @@ const Home = () => {
           <Text className="text-lg font-bold text-app-text dark:text-white">
             Recent Transactions
           </Text>
-          <TouchableOpacity onPress={() => router.push("/(dashboard)/tasks")}>
-            <Text className="text-app-primary dark:text-white font-semibold text-sm">
+          <TouchableOpacity onPress={() => router.push("/(dashboard)/history")}>
+            <Text className="text-app-primary dark:text-appDark-primary font-semibold text-sm">
               View All
             </Text>
           </TouchableOpacity>
@@ -352,9 +352,9 @@ const Home = () => {
                 return (
                   <View
                     key={tx.id}
-                    className="flex-row items-center bg-white dark:bg-black p-4 rounded-2xl mb-3 border border-app-border dark:border-white/15"
+                    className="flex-row items-center bg-white dark:bg-black p-4 rounded-2xl mb-3 border border-app-primary/20 dark:border-appDark-primary/30"
                   >
-                    <View className="w-12 h-12 rounded-full items-center justify-center bg-app-surface2 dark:bg-white/10 border border-app-border dark:border-white/15">
+                    <View className="w-12 h-12 rounded-full items-center justify-center bg-app-primary/10 dark:bg-appDark-primary/20 border border-app-primary/20 dark:border-appDark-primary/30">
                       <MaterialIcons
                         name={isIncome ? "arrow-downward" : "arrow-upward"}
                         size={24}
@@ -384,9 +384,9 @@ const Home = () => {
 
           <TouchableOpacity
             onPress={() => router.push("/transaction")}
-            className="mt-2 bg-app-primary dark:bg-white rounded-2xl py-4 items-center justify-center"
+            className="mt-2 bg-app-primary dark:bg-appDark-primary rounded-2xl py-4 items-center justify-center"
           >
-            <Text className="text-white dark:text-black font-semibold text-base">
+            <Text className="text-app-onPrimary dark:text-appDark-onPrimary font-semibold text-base">
               Add Record
             </Text>
           </TouchableOpacity>
