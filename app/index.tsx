@@ -2,7 +2,7 @@ import { View, Text, ActivityIndicator } from "react-native"
 import React from "react"
 import "../global.css"
 import { Redirect } from "expo-router"
-import { useAuth } from "@/hooks/useAuth"
+import { useAuth } from "../hooks/useAuth"
 
 const Index = () => {
   const { user, loading } = useAuth()

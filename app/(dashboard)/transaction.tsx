@@ -1,13 +1,13 @@
-import { useAuth } from "@/hooks/useAuth";
-import { useLoader } from "@/hooks/useLoader";
+import { useAuth } from "../../hooks/useAuth";
+import { useLoader } from "../../hooks/useLoader";
 import {
 	addFinanceTransaction,
 	deleteFinanceTransaction,
 	getFinanceSummary,
 	listFinanceTransactions,
 	updateFinanceTransaction,
-} from "@/services/financeService";
-import type { FinanceSummary, FinanceTransaction } from "@/types/finance";
+} from "../../services/financeService";
+import type { FinanceSummary, FinanceTransaction } from "../../types/finance";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";

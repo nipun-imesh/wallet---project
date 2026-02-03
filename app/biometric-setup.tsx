@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "../hooks/useAuth";
 import {
     confirmBiometric,
     ensureBiometricAvailable,
@@ -6,7 +6,7 @@ import {
     markBiometricJustEnabled,
     setBiometricEnabled,
     setBiometricPrompted,
-} from "@/services/biometricService";
+} from "../services/biometricService";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { Alert, Pressable, Switch, Text, View } from "react-native";

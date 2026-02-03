@@ -1,5 +1,5 @@
-import { AuthProvider } from "@/context/AuthContext";
-import { LoaderProvider } from "@/context/LoaderContext";
+import { AuthProvider } from "../context/AuthContext";
+import { LoaderProvider } from "../context/LoaderContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Slot } from "expo-router";
 import { useColorScheme } from "nativewind";

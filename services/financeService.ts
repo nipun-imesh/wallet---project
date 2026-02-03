@@ -3,7 +3,7 @@ import type {
   FinanceSummary,
   FinanceTransaction,
   TransactionType,
-} from "@/types/finance";
+} from "../types/finance";
 import { getAuth } from "firebase/auth";
 import {
   addDoc,
