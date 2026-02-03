@@ -16,9 +16,9 @@ import { AppState, Platform, Pressable, Text, View } from "react-native";
 
 const tabs = [
   { name: "home", icon: "home", title: "Home" },
-  { name: "transaction", icon: "article", title: "Transaction" },
-  { name: "tasks", icon: "assignment", title: "History" },
-  { name: "settings", icon: "settings", title: "Settings" },
+  { name: "news", icon: "article", title: "Activity" },
+  { name: "profile", icon: "person", title: "Profile" },
+  { name: "tasks", icon: "assignment", title: "Tasks" },
 ] as const;
 // DRY - Don't Repeat Yourself
 const DashboardLayout = () => {
@@ -198,14 +198,15 @@ const DashboardLayout = () => {
         headerShown: false,
         tabBarActiveTintColor: isDark ? "#FFFFFF" : "#111827",
         tabBarInactiveTintColor: isDark ? "rgba(255,255,255,0.55)" : "#6B7280",
-        // We render icon + label together in tabBarIcon to avoid label clipping
-        // with custom rounded/absolute-positioned tab bars.
-        tabBarShowLabel: false,
+        tabBarLabelStyle: {
+          fontSize: 12,
+          marginBottom: Platform.OS === "ios" ? 6 : 8,
+        },
         tabBarStyle: {
           position: "absolute",
           left: 16,
           right: 16,
-          bottom: Platform.OS === "ios" ? 15 : 2,
+          bottom: Platform.OS === "ios" ? 14 : 12,
           height: Platform.OS === "ios" ? 72 : 68,
           paddingTop: 10,
           borderTopWidth: 0,
@@ -225,20 +226,10 @@ const DashboardLayout = () => {
           name={tab.name}
           options={{
             title: tab.title,
-            tabBarIcon: ({ color, size }) => {
-              const iconSize = Math.min(26, Math.max(22, size ?? 24));
-              return (
-                <View className="items-center justify-center" style={{ width: 72 }}>
-                  <MaterialIcons name={tab.icon} color={color} size={iconSize} />
-                  <Text
-                    numberOfLines={1}
-                    style={{ color, fontSize: 12, marginTop: 2, includeFontPadding: false }}
-                  >
-                    {tab.title}
-                  </Text>
-                </View>
-              );
-            },
+            tabBarLabel: tab.title,
+            tabBarIcon: ({ color, size }) => (
+              <MaterialIcons name={tab.icon} color={color} size={size} />
+            ),
           }}
         />
       ))}
